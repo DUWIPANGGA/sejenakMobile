@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_primary_button.dart';
-import 'package:selena/app/component/sejenak_text.dart';
-import 'package:selena/app/component/sejenak_text_field.dart';
+import 'package:selena/app/components/sejenak_primary_button.dart';
+import 'package:selena/app/components/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_text_field.dart';
 import 'package:selena/app/partial/comunity/sejenak_comment_container.dart';
 import 'package:selena/root/sejenak_color.dart';
 

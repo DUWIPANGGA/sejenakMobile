@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-import '../../app/component/sejenak_error.dart';
+import '../../app/components/sejenak_error.dart';
 import '../../models/user_models/user.dart';
 import '../../models/user_models/user_models.dart';
 import '../../session/user_session.dart';

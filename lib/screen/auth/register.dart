@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_button.dart';
-import 'package:selena/app/component/sejenak_loading.dart';
+import 'package:selena/app/components/sejenak_button.dart';
+import 'package:selena/app/components/sejenak_loading.dart';
 import 'package:selena/services/auth/auth.dart';
 
 import '../../services/controller.dart';

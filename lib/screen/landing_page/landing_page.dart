@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:selena/app/component/sejenak_primary_button.dart';
-import 'package:selena/app/component/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_primary_button.dart';
+import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/root/sejenak_color.dart';
 
 class Landingpage extends StatelessWidget {

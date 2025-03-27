@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:selena/app/component/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/root/sejenak_color.dart';
 
 class SejenakLoading extends StatelessWidget {

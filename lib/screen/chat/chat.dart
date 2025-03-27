@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_audio_list.dart';
+import 'package:selena/app/components/sejenak_audio_list.dart';
 import 'package:selena/app/partial/chat/sejenak_main_chat.dart';
 import 'package:selena/app/partial/main/sejenak_circular.dart';
 import 'package:selena/app/partial/main/sejenak_error.dart';

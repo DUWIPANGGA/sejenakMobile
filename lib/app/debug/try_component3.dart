@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_audio_list.dart';
+import 'package:selena/app/components/sejenak_audio_list.dart';
 
 class TryComponent3 extends StatelessWidget {
   const TryComponent3({super.key});

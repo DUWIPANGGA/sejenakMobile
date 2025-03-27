@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_floating_button.dart';
+import 'package:selena/app/components/sejenak_floating_button.dart';
 import 'package:selena/app/partial/comunity/sejenak_create_post.dart';
 import 'package:selena/app/partial/comunity/sejenak_detail_post.dart';
 import 'package:selena/app/partial/comunity/sejenak_post_container.dart';

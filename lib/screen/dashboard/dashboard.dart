@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/app/partial/sejenak_navbar.dart';
 import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/session/user_session.dart';

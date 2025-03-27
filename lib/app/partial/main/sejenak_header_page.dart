@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_text.dart';
 
 class SejenakHeaderPage extends StatelessWidget {
   final String? text;

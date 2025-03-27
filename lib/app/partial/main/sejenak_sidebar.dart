@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/component/sejenak_primary_button.dart';
-import 'package:selena/app/component/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_primary_button.dart';
+import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/root/sejenak_color.dart';
 
