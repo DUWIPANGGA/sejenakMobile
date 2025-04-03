@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/root/sejenak_color.dart';
 
 class SejenakCommentContainer extends StatelessWidget {
   final Widget? child;
+  final int id;
   final String text;
   final String name;
   final String date;
@@ -13,10 +13,13 @@ class SejenakCommentContainer extends StatelessWidget {
   final bool isLike;
   final bool isMe;
   final int comment;
+  late bool isReply = false;
+  final Function(bool isReply)? onReplyChanged;
 
-  const SejenakCommentContainer({
+  SejenakCommentContainer({
     super.key,
     this.child,
+    required this.id,
     required this.text,
     this.name = 'anonimus',
     this.date = 'jan 1, 2000',
@@ -25,6 +28,7 @@ class SejenakCommentContainer extends StatelessWidget {
     this.comment = 0,
     this.isLike = false,
     this.isMe = false,
+    this.onReplyChanged,
   });
 
   @override
@@ -72,7 +76,7 @@ class SejenakCommentContainer extends StatelessWidget {
                     const SizedBox(width: 6.5),
                     SejenakText(text: name, type: SejenakTextType.regular),
                     SejenakText(
-                      text: " • $date",
+                      text: " • ${date.substring(0, 10)}",
                       type: SejenakTextType.regular,
                       style: const TextStyle(color: SejenakColor.secondary),
                     ),
@@ -92,25 +96,33 @@ class SejenakCommentContainer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SejenakText(
-                      text: "Reply",
-                      type: SejenakTextType.regular,
+                    GestureDetector(
+                      onTap: () {
+                        isReply = true;
+                        if (onReplyChanged != null) {
+                          onReplyChanged!(isReply);
+                        }
+                      },
+                      child: SejenakText(
+                        text: "Reply",
+                        type: SejenakTextType.regular,
+                      ),
                     ),
                     SizedBox(
                       width: 16,
                     ),
-                    SvgPicture.asset(
-                      'assets/svg/like_comment.svg',
-                      width: 18,
-                      height: 18,
-                    ),
-                    SizedBox(
-                      width: 3,
-                    ),
-                    SejenakText(text: likes.toString()),
-                    SizedBox(
-                      width: 8,
-                    ),
+                    // SvgPicture.asset(
+                    //   'assets/svg/like_comment.svg',
+                    //   width: 18,
+                    //   height: 18,
+                    // ),
+                    // SizedBox(
+                    //   width: 3,
+                    // ),
+                    // SejenakText(text: likes.toString()),
+                    // SizedBox(
+                    //   width: 8,
+                    // ),
                   ],
                 ),
                 if (child != null)

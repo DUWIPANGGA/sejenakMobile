@@ -26,8 +26,7 @@ class SejenakSidebar extends StatelessWidget {
                       backgroundColor: Colors.black,
                       child: CircleAvatar(
                         radius: 40,
-                        backgroundImage:
-                            NetworkImage('https://i.pravatar.cc/150?img=3'),
+                        backgroundImage: NetworkImage(user!.user!.profil),
                       ),
                     ),
                     SejenakText(

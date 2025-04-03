@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:selena/models/user_models/user.dart' as models;
 
 import '../../app/components/sejenak_error.dart';
-import '../../models/user_models/user.dart';
 import '../../models/user_models/user_models.dart';
 import '../../session/user_session.dart';
 import '../api.dart';
@@ -20,17 +21,15 @@ abstract class AuthWithRegister {
 
 class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
   final AuthFormController formController;
-  final DioHttpClient auth = HttpClientBuilder().withDio(Dio()).build();
-  final API api = API();
-  SejenakApiAuthService(this.formController) {}
+  SejenakApiAuthService(this.formController);
 
   @override
   Future<void> login(BuildContext context) async {
     print(
         "name: ${formController.name.text} password ${formController.password.text}");
     try {
-      final response = await auth.post(
-        api.login,
+      final response = await DioHttpClient.getInstance().post(
+        API.login,
         data: {
           "email": formController.name.text,
           "password": formController.password.text,
@@ -45,9 +44,11 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
           status: response.data["status"] ?? "",
           token: response.data["token"] ?? "",
           user: response.data["user"] is Map<String, dynamic>
-              ? User.fromJson(response.data["user"] as Map<String, dynamic>)
+              ? models.User.fromJson(
+                  response.data["user"] as Map<String, dynamic>)
               : null,
         ));
+        DioHttpClient.getInstance().setToken(response.data["token"]);
 
         Navigator.pushReplacementNamed(context, '/comunity');
       }
@@ -65,7 +66,8 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
   @override
   Future<void> register(BuildContext context) async {
     try {
-      final response = await auth.post(api.register, data: {
+      final response =
+          await DioHttpClient.getInstance().post(API.register, data: {
         'name': formController.name.text,
         'username': formController.username.text,
         'email': formController.email.text,
@@ -91,19 +93,73 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
 }
 
 class GoogleAuthService implements SejenakAuth {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-    serverClientId:
-        "226311772731-v7ohhv9hp30v706ud0uj9t55uacftkjj.apps.googleusercontent.com",
-  );
+      scopes: ['email', 'profile', 'openid'],
+      serverClientId:
+          '482406091527-1ar496hfu5qeriendtge6f52bcsd19mv.apps.googleusercontent.com',
+      clientId:
+          '226311772731-qq0jphmrarn64nftf2iv312jobllinif.apps.googleusercontent.com');
   @override
   Future<void> login(BuildContext context) async {
     try {
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null;
+      print(googleUser);
+      if (googleUser == null) return;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+      final UserCredential userCredential =
+          await _firebaseAuth.signInWithCredential(credential);
+      final String? firebaseIdToken = await userCredential.user?.getIdToken();
+      if (firebaseIdToken != null) {
+        print("ID Token: ${firebaseIdToken}");
+      } else {
+        print("ID Token tidak ditemukan.");
+      }
+      if (googleAuth.idToken == null) {
+        showErrorDialog(context, "Login gagal! ID Token tidak ditemukan.");
+        return;
+      }
+      try {
+        DioHttpClient.getInstance().setToken(firebaseIdToken!);
+        final response = await DioHttpClient.getInstance().post(
+          API.googleAuth,
+          data: {
+            'name': googleUser.displayName,
+            'username': googleUser.displayName,
+            'email': googleUser.email,
+            'profil': googleUser.photoUrl,
+          },
+        );
+        if (response.statusCode == 200) {
+          print(response);
+          UserSession().setUser(UserModels(
+            code: response.data["code"] ?? "",
+            status: response.data["status"] ?? "",
+            token: response.data["token"] ?? "",
+            user: response.data["user"] is Map<String, dynamic>
+                ? models.User.fromJson(
+                    response.data["user"] as Map<String, dynamic>)
+                : null,
+          ));
+          DioHttpClient.getInstance().setToken(response.data["token"]);
+
+          Navigator.pushReplacementNamed(context, '/comunity');
+        }
+      } catch (e) {
+        if (e is DioException) {
+          print("Dio Error: ${e.response?.statusCode}");
+          print("Message: ${e.response?.data}");
+          showErrorDialog(context, "register gagal! Silakan coba lagi!");
+        }
+      }
     } catch (e) {
       showErrorDialog(context, "login gagal! Silakan coba lagi!");
-      print("Google Sign-In Error: $e");
+      print("Google Sign-In Error: ${e.toString()}");
     }
   }
 

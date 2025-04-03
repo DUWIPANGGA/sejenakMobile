@@ -1,18 +1,23 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:image_picker/image_picker.dart';
 import 'package:selena/app/components/sejenak_primary_button.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/root/sejenak_color.dart';
 
 class SejenakCreatePost {
   final int id;
+  final ImagePicker _picker = ImagePicker();
+  File? image;
   final TextEditingController commentInput = TextEditingController();
   final headingList = [
     quill.Attribute.h1,
     quill.Attribute.h2,
     quill.Attribute.h3,
-    // quill.Attribute.,
-    // quill.Attribute.h5,
+    quill.Attribute.h4,
+    quill.Attribute.h5,
   ];
   SejenakCreatePost({required this.id});
 
@@ -30,7 +35,7 @@ class SejenakCreatePost {
         return StatefulBuilder(
           builder: (context, setState) {
             _quillController.addListener(() {
-              setState(() {}); // Rebuild untuk update opacity
+              setState(() {});
             });
 
             return Container(
@@ -89,12 +94,6 @@ class SejenakCreatePost {
                                 controller: _quillController,
                                 focusNode: _focusNode,
                                 scrollController: _scrollController,
-                                readOnly: false,
-                                placeholder: 'Tulis komentar...',
-                                padding: EdgeInsets.all(10),
-                                scrollable: true,
-                                expands: true,
-                                autoFocus: true,
                               ),
                               IgnorePointer(
                                 child: AnimatedOpacity(
@@ -178,13 +177,64 @@ class SejenakCreatePost {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              Container(
-                                child: SejenakPrimaryButton(
-                                    width: 60,
-                                    height: 60,
-                                    text: "",
-                                    action: () async {},
-                                    icon: "assets/svg/pen.svg"),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  if (image != null)
+                                    Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 1.0,
+                                          color: Colors.grey[900]!,
+                                        ),
+                                        color: SejenakColor.secondary,
+                                        borderRadius: BorderRadius.circular(10),
+                                        boxShadow: [
+                                          const BoxShadow(
+                                            color: SejenakColor.black,
+                                            spreadRadius: 0.2,
+                                            blurRadius: 0,
+                                            offset: Offset(0.1, 4),
+                                          ),
+                                        ],
+                                        image: DecorationImage(
+                                          image: FileImage(image!),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  SizedBox(
+                                    height: 10,
+                                  ),
+                                  Container(
+                                    child: SejenakPrimaryButton(
+                                        width: 60,
+                                        height: 60,
+                                        text: "",
+                                        action: () async {
+                                          final pickedFile =
+                                              await _picker.pickImage(
+                                                  source: ImageSource.gallery);
+                                          if (pickedFile != null) {
+                                            setState(() {
+                                              image = File(pickedFile.path);
+                                            });
+                                          }
+                                        },
+                                        icon: "assets/svg/camera.svg"),
+                                  ),
+                                  SizedBox(height: 10),
+                                  Container(
+                                    child: SejenakPrimaryButton(
+                                        width: 60,
+                                        height: 60,
+                                        text: "",
+                                        action: () async {},
+                                        icon: "assets/svg/pen.svg"),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

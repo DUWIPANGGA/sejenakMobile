@@ -3,7 +3,8 @@ import 'package:selena/app/components/sejenak_text.dart';
 
 class SejenakHeaderPage extends StatelessWidget {
   final String? text;
-  const SejenakHeaderPage({super.key, this.text});
+  final String? profile;
+  const SejenakHeaderPage({super.key, this.text, this.profile});
 
   @override
   Widget build(BuildContext context) {
@@ -31,8 +32,12 @@ class SejenakHeaderPage extends StatelessWidget {
                     backgroundColor: Colors.black,
                     child: CircleAvatar(
                       radius: 24,
-                      backgroundImage:
-                          NetworkImage('https://i.pravatar.cc/150?img=3'),
+                      backgroundImage: this.profile != null
+                          ? NetworkImage(this.profile!)
+                          : null,
+                      child: this.profile != null
+                          ? null
+                          : Icon(Icons.person, size: 35),
                     ),
                   ),
                 ),

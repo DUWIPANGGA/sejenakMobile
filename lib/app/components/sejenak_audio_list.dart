@@ -82,51 +82,53 @@ class _SejenakAudioListState extends State<SejenakAudioList> {
                     : [],
               ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                        color: widget.color,
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            widget.image,
+                  Row(
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                            color: widget.color,
+                            image: DecorationImage(
+                              image: NetworkImage(
+                                widget.image,
+                              ),
+                              fit: BoxFit.cover,
+                            ),
+                            border: Border.all(
+                                width: 2.0, color: SejenakColor.stroke),
+                            borderRadius: BorderRadius.circular(5)),
+                      ),
+                      const SizedBox(width: 12.29),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SejenakText(
+                            text: widget.title,
+                            type: SejenakTextType.h5,
+                            maxLines: 1,
                           ),
-                          fit: BoxFit.cover,
-                        ),
-                        border:
-                            Border.all(width: 2.0, color: SejenakColor.stroke),
-                        borderRadius: BorderRadius.circular(5)),
-                  ),
-                  const SizedBox(width: 12.29),
-                  Flexible(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SejenakText(
-                          text: widget.title,
-                          type: SejenakTextType.h5,
-                          maxLines: 1,
-                        ),
-                        SejenakText(
-                          text: widget.text,
-                          type: SejenakTextType.regular,
-                          maxLines: 1,
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    width: 8,
+                          SejenakText(
+                            text: widget.text,
+                            type: SejenakTextType.regular,
+                            maxLines: 1,
+                          ),
+                        ],
+                      ),
+                      SizedBox(
+                        width: 8,
+                      ),
+                    ],
                   ),
                   SvgPicture.asset(
                     'assets/svg/play.svg',
                     width: 19,
                     height: 19,
-                  )
+                  ),
                 ],
               ),
             ),

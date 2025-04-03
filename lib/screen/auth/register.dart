@@ -1,22 +1,24 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:selena/app/components/sejenak_button.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:selena/app/components/sejenak_loading.dart';
+import 'package:selena/app/components/sejenak_password_field.dart';
+import 'package:selena/app/components/sejenak_primary_button.dart';
+import 'package:selena/app/components/sejenak_text.dart';
+import 'package:selena/app/components/sejenak_text_field.dart';
+import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/services/auth/auth.dart';
 
 import '../../services/controller.dart';
-import '../../style/sejenak_container.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  _RegisterScreen createState() => _RegisterScreen();
 }
 
-class _LoginScreenState extends State<RegisterScreen> {
+class _RegisterScreen extends State<RegisterScreen> {
   final AuthFormController sejenak = AuthFormController();
-  final Dio dio = Dio();
   late SejenakApiAuthService auth;
   @override
   void initState() {
@@ -24,11 +26,14 @@ class _LoginScreenState extends State<RegisterScreen> {
     auth = SejenakApiAuthService(sejenak);
   }
 
+  String get authUrl => 'http://192.168.1.21:8000/api';
   bool isLoading = false;
 
   Future<void> handleRegister() async {
     setState(() => isLoading = true);
-
+    print(sejenak.name.text);
+    print(sejenak.password.text);
+    print(sejenak.email.text);
     await auth.register(context);
 
     setState(() => isLoading = false);
@@ -37,106 +42,107 @@ class _LoginScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.pushNamed(context, '/');
+        },
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        splashColor: Colors.transparent,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        child: Icon(Icons.close, color: SejenakColor.primary),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.startTop,
       body: isLoading
           ? const Center(child: SejenakLoading())
           : Center(
-              child: Container(
-                width: 251,
-                decoration: SejenakContainer.primaryBox,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Text(
-                        "REGISTER",
-                        style: TextStyle(
-                          fontFamily: 'Lexend',
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                        ),
+              child: Padding(
+                padding: const EdgeInsets.only(left: 64, right: 64),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 64,
+                    ),
+                    SvgPicture.asset(
+                      'assets/svg/logo_mini.svg',
+                      width: 40,
+                      height: 37,
+                      colorFilter: ColorFilter.mode(
+                        SejenakColor.primary,
+                        BlendMode.srcIn,
                       ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        child: TextFormField(
-                          maxLength: 50,
-                          controller: sejenak.name,
-                          decoration: const InputDecoration(
-                            labelText: 'Full name',
-                            labelStyle: TextStyle(
-                                color: Colors.blueGrey, fontFamily: 'Lexend'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueGrey),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        child: TextFormField(
-                          maxLength: 50,
-                          controller: sejenak.username,
-                          decoration: const InputDecoration(
-                            labelText: 'Username',
-                            labelStyle: TextStyle(
-                                color: Colors.blueGrey, fontFamily: 'Lexend'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueGrey),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        child: TextFormField(
-                          maxLength: 50,
-                          controller: sejenak.email,
-                          decoration: const InputDecoration(
-                            labelText: 'Email',
-                            labelStyle: TextStyle(
-                                color: Colors.blueGrey, fontFamily: 'Lexend'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueGrey),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        child: TextFormField(
-                          controller: sejenak.password,
-                          maxLength: 20,
-                          decoration: const InputDecoration(
-                            labelText: 'password',
-                            labelStyle: TextStyle(
-                                color: Colors.blueGrey, fontFamily: 'Lexend'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueGrey),
-                            ),
-                          ),
-                          obscureText: true,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        child: TextFormField(
-                          controller: sejenak.passwordVerification,
-                          maxLength: 20,
-                          decoration: const InputDecoration(
-                            labelText: 'confirm password',
-                            labelStyle: TextStyle(
-                                color: Colors.blueGrey, fontFamily: 'Lexend'),
-                            enabledBorder: UnderlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blueGrey),
-                            ),
-                          ),
-                          obscureText: true,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SejenakButton(text: "register", action: handleRegister)
-                    ],
-                  ),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    SejenakText(
+                      text: "Sejenak",
+                      type: SejenakTextType.h3,
+                    ),
+                    SizedBox(
+                      height: 103,
+                    ),
+                    SejenakText(
+                      text: "Daftar dengan Email",
+                      type: SejenakTextType.h5,
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    SejenakTextField(
+                      text: "Name",
+                      controller: sejenak.name,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    SejenakTextField(
+                      text: "Username",
+                      controller: sejenak.username,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    SejenakTextField(
+                      text: "Email",
+                      controller: sejenak.email,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    SejenakPasswordField(
+                      text: "Password",
+                      controller: sejenak.password,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    SejenakPasswordField(
+                      text: "Confirm Password",
+                      controller: sejenak.passwordVerification,
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    SizedBox(
+                      height: 16,
+                    ),
+                    SejenakPrimaryButton(
+                      text: "Register",
+                      action: handleRegister,
+                      color: SejenakColor.secondary,
+                    ),
+                    SizedBox(
+                      height: 21,
+                    ),
+                    SejenakText(
+                      text:
+                          "Dengan membuat akun, anda setuju dengan Kebijakan Penggunaan kamu dan memahami bahwa Kebijakan Privasi kami ",
+                      type: SejenakTextType.small,
+                      color: SejenakColor.secondary,
+                    )
+                  ],
                 ),
               ),
             ),

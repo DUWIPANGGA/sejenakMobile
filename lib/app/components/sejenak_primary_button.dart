@@ -10,6 +10,8 @@ class SejenakPrimaryButton extends StatefulWidget {
   final Color color;
   final double fontSize;
   final double? width;
+  final double paddingY;
+  final double paddingX;
   final double? height;
   final Future<void> Function() action;
 
@@ -20,6 +22,8 @@ class SejenakPrimaryButton extends StatefulWidget {
     this.icon = '',
     this.width,
     this.height,
+    this.paddingX = 16,
+    this.paddingY = 12,
     this.color = SejenakColor.primary,
     this.fontStyle = 'Lexend',
     this.fontSize = 14.24,
@@ -65,7 +69,8 @@ class _SejenakPrimaryButtonState extends State<SejenakPrimaryButton> {
           child: Transform.translate(
             offset: Offset(0, offsetY),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(
+                  horizontal: widget.paddingX, vertical: widget.paddingY),
               decoration: BoxDecoration(
                 border: Border.all(
                   width: 1.0,

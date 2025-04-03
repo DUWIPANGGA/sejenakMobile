@@ -16,16 +16,17 @@ import 'package:selena/session/user_session.dart';
 class Comunity extends StatelessWidget {
   final UserModels? user;
   final ComunityServices comunity;
+  final ComunityAction comunityAction;
   final Future<List<PostModels>> result;
 
   Comunity({super.key})
       : user = UserSession().user,
         comunity = ComunityServices(UserSession().user!),
+        comunityAction = ComunityAction(UserSession().user!),
         result = ComunityServices(UserSession().user!).getAllPosts() {
     assert(user != null, "User tidak boleh null!");
   }
 // detail post
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +54,7 @@ class Comunity extends StatelessWidget {
               if (index == 0) {
                 return SejenakHeaderPage(
                   text: "Post",
+                  profile: user!.user!.profil,
                 );
               }
 
@@ -60,15 +62,19 @@ class Comunity extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: SejenakPostContainer(
-                  title: post.judul ?? "Judul Kosong",
-                  postImage: post.postPicture ?? "",
-                  text: post.deskripsiPost ?? "Tidak ada konten",
-                  likes: post.totalLike ?? 0,
-                  comment: post.totalComment ?? 0,
-                  isLike: post.isLiked ?? false,
-                  commentAction: () => SejenakDetailPost(id: post.postId ?? 0)
-                      .showDetail(context),
-                ),
+                    title: post.judul ?? "Judul Kosong",
+                    postImage: post.postPicture ?? "",
+                    text: post.deskripsiPost ?? "Tidak ada konten",
+                    likes: post.totalLike ?? 0,
+                    comment: post.totalComment ?? 0,
+                    name: post.username!,
+                    isLike: post.isLiked ?? false,
+                    date: post.createdAt!.substring(0, 10),
+                    commentAction: () =>
+                        SejenakDetailPost(post: post).showDetail(context),
+                    likeAction: (bool isLiked, int postID) async {
+                      comunityAction.likePost(isLiked, post.postId!);
+                    }),
               );
             },
           );

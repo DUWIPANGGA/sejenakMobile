@@ -1,10 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:selena/firebase_options.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/screen/landing_page/landing_page.dart';
 
 import 'routes/routes.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MainApp());
 }
 
@@ -47,7 +53,7 @@ class MainApp extends StatelessWidget {
         }
         return null;
       },
-      home: Landingpage(),
+      home: LandingPage(),
     );
   }
 }

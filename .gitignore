@@ -30,7 +30,7 @@ migrate_working_dir/
 build/
 android/app/build/
 android/build/
-
+assets/
 # Symbolication related
 app.*.symbols
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:selena/app/components/sejenak_calendar.dart';
 import 'package:selena/app/partial/chat/sejenak_main_chat.dart';
 import 'package:selena/app/partial/journal/sejenak_journal_list.dart';
 import 'package:selena/app/partial/main/sejenak_circular.dart';
@@ -52,6 +53,9 @@ class Journal extends StatelessWidget {
                 return SejenakHeaderPage(
                   text: "Journal",
                 );
+              }
+              if (index == 0) {
+                return SejenakCalendar();
               }
 
               return Padding(

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "482406091527",
+    "project_id": "sejenak-b9227",
+    "storage_bucket": "sejenak-b9227.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482406091527:android:558fcef14b3f3ee17a53a2",
+        "android_client_info": {
+          "package_name": "com.sejenak.selena"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "482406091527-o1db4384l0c2oba9vc36p0p0i3altmtf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sejenak.selena",
+            "certificate_hash": "805302b18064aa346c48f05d537e89cafc81fef0"
+          }
+        },
+        {
+          "client_id": "482406091527-1ar496hfu5qeriendtge6f52bcsd19mv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAl5qFPM40WNaBU8KEK3Ms8xDKgkd4rEtU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "482406091527-1ar496hfu5qeriendtge6f52bcsd19mv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
