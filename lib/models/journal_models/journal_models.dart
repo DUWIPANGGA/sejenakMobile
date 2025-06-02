@@ -32,4 +32,7 @@ class JournalModels {
         'created_at': createdAt,
         'updated_at': updatedAt,
       };
+  static List<JournalModels> fromJsonList(List<dynamic> jsonList) {
+    return jsonList.map((json) => JournalModels.fromJson(json)).toList();
+  }
 }

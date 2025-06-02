@@ -75,6 +75,16 @@ class User {
         'updated_at': updatedAt?.toIso8601String(),
       };
 
+  static List<Map<String, dynamic>> toJsonList(List<User> users) {
+    return users.map((user) => user.toJson()).toList();
+  }
+
+  static List<User> fromJsonList(List<dynamic> jsonList) {
+    return jsonList
+        .map((json) => User.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;

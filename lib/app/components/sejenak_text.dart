@@ -9,12 +9,14 @@ class SejenakText extends StatelessWidget {
   final TextAlign textAlign;
   final FontWeight fontWeight;
   final Color color;
+  final TextOverflow overflow;
   final SejenakTextType type;
 
   const SejenakText(
       {super.key,
       required this.text,
       this.style,
+      this.overflow = TextOverflow.ellipsis,
       this.maxLines,
       this.color = SejenakColor.stroke,
       this.textAlign = TextAlign.center,

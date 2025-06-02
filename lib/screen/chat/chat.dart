@@ -1,38 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:selena/app/components/sejenak_audio_list.dart';
+import 'package:selena/app/components/sejenak_user_list.dart';
 import 'package:selena/app/partial/chat/sejenak_main_chat.dart';
 import 'package:selena/app/partial/main/sejenak_circular.dart';
 import 'package:selena/app/partial/main/sejenak_error.dart';
 import 'package:selena/app/partial/main/sejenak_header_page.dart';
 import 'package:selena/app/partial/main/sejenak_sidebar.dart';
 import 'package:selena/app/partial/sejenak_navbar.dart';
-import 'package:selena/models/post_models/post_models.dart';
+import 'package:selena/models/user_models/user.dart';
 import 'package:selena/models/user_models/user_models.dart';
-import 'package:selena/services/comunity/comunity.dart';
+import 'package:selena/services/chat/chat.dart';
 import 'package:selena/session/user_session.dart';
 
 class Chat extends StatelessWidget {
-  final UserModels? user;
-  final ComunityServices comunity;
-  final Future<List<PostModels>> result;
+  final UserModels? mySession;
+  final ChatServices comunity;
+  final Future<List<User>> result;
 
   Chat({super.key})
-      : user = UserSession().user,
-        comunity = ComunityServices(UserSession().user!),
-        result = ComunityServices(UserSession().user!).getAllPosts() {
-    assert(user != null, "User tidak boleh null!");
+      : mySession = UserSession().user,
+        comunity = ChatServices(),
+        result = ChatServices().getAllKonselor() {
+    assert(mySession != null, "User tidak boleh null!");
   }
-// detail post
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<List<PostModels>>(
+      body: FutureBuilder<List<User>>(
         future: result,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: SejenakCircular());
           } else if (snapshot.hasError) {
+            print(snapshot);
             return SejenakError(
               message: snapshot.error.toString(),
             );
@@ -42,23 +41,27 @@ class Chat extends StatelessWidget {
             );
           }
 
-          List<PostModels> posts = snapshot.data!;
+          List<User> users = snapshot.data!;
 
           return ListView.builder(
-            itemCount: posts.length + 1,
+            itemCount: users.length + 1,
             padding: EdgeInsets.zero,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return SejenakHeaderPage(
                   text: "Chat",
+                  profile: mySession!.user!.profil,
                 );
               }
-
+              var user = users[index - 1];
+              print("UserModels: ${user.toJson()}");
               return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  child: SejenakAudioList(
-                      title: "fulan",
-                      text: "lamo",
+                  child: SejenakUserList(
+                      title: user.username!,
+                      image: user.profil ?? "",
+                      text: user.deskripsiProfil ??
+                          "hello there im ${user.username}",
                       action: () async {
                         SejenakMainChat(id: index).showChat(context);
                       }));
@@ -66,8 +69,8 @@ class Chat extends StatelessWidget {
           );
         },
       ),
-      endDrawer: SejenakSidebar(user: user),
-      bottomNavigationBar: SejenakNavbar(index: 0),
+      endDrawer: SejenakSidebar(user: mySession),
+      bottomNavigationBar: SejenakNavbar(index: 3),
     );
   }
 }

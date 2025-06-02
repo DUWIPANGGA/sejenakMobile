@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:selena/models/journal_models/journal_models.dart';
+import 'package:selena/services/api.dart';
 
 abstract class JournalService {
   Future<List<JournalModels>> getAllJournal();
@@ -12,13 +13,27 @@ abstract class JournalService {
 class JournalApiService implements JournalService {
   final Dio _dio = Dio();
   final String _baseUrl = "http://192.168.1.21:8000/api/journal";
+  late List<JournalModels> _journals;
 
   @override
   Future<List<JournalModels>> getAllJournal() async {
-    final response = await _dio.get(_baseUrl);
-    return (response.data as List)
-        .map((json) => JournalModels.fromJson(json))
-        .toList();
+    try {
+      final response = await DioHttpClient.getInstance().get(
+        API.jurnal,
+        data: {"action": "all"},
+      );
+      print("Response: ${response.data['body']}");
+      if (response.data['body'] is List) {
+        _journals = JournalModels.fromJsonList(response.data['body']);
+        print("Response: ${_journals}");
+        return _journals;
+      } else {
+        throw Exception("Unexpected response format");
+      }
+    } on DioException catch (e) {
+      print("Dio Error: ${e.message}");
+      throw Exception("Failed to load posts: ${e.response?.statusCode}");
+    }
   }
 
   @override

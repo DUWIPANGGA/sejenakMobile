@@ -1,10 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 
 import '../../root/sejenak_color.dart';
 
-class SejenakAudioList extends StatefulWidget {
+class SejenakUserList extends StatefulWidget {
   final String title;
   final String text;
   final String fontStyle;
@@ -13,7 +15,7 @@ class SejenakAudioList extends StatefulWidget {
   final double fontSize;
   final Future<void> Function() action;
 
-  const SejenakAudioList({
+  const SejenakUserList({
     super.key,
     required this.title,
     required this.text,
@@ -25,10 +27,10 @@ class SejenakAudioList extends StatefulWidget {
   });
 
   @override
-  _SejenakAudioListState createState() => _SejenakAudioListState();
+  _SejenakUserListState createState() => _SejenakUserListState();
 }
 
-class _SejenakAudioListState extends State<SejenakAudioList> {
+class _SejenakUserListState extends State<SejenakUserList> {
   bool click = false;
   double opacity = 1.0;
   double offsetY = 0.0;
@@ -93,9 +95,11 @@ class _SejenakAudioListState extends State<SejenakAudioList> {
                         decoration: BoxDecoration(
                             color: widget.color,
                             image: DecorationImage(
-                              image: NetworkImage(
-                                widget.image,
-                              ),
+                              image: widget.image != ""
+                                  ? NetworkImage(
+                                      widget.image,
+                                    )
+                                  : AssetImage('assets/icon/profile.png'),
                               fit: BoxFit.cover,
                             ),
                             border: Border.all(
@@ -113,10 +117,12 @@ class _SejenakAudioListState extends State<SejenakAudioList> {
                             maxLines: 1,
                           ),
                           SejenakText(
-                            text: widget.text,
+                            text: widget.text.substring(
+                                0, min(25, (widget.text ?? '').length)),
                             type: SejenakTextType.regular,
                             maxLines: 1,
-                          ),
+                            overflow: TextOverflow.fade,
+                          )
                         ],
                       ),
                       SizedBox(

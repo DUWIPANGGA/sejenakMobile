@@ -25,6 +25,11 @@ class UserModels {
         'token': token,
         'user': user?.toJson(),
       };
+  static List<UserModels> fromJsonList(List<dynamic> jsonList) {
+    return jsonList
+        .map((json) => UserModels.fromJson(json as Map<String, dynamic>))
+        .toList();
+  }
 
   @override
   bool operator ==(Object other) {

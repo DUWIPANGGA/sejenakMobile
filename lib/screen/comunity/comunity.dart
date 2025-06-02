@@ -14,17 +14,17 @@ import 'package:selena/services/comunity/comunity.dart';
 import 'package:selena/session/user_session.dart';
 
 class Comunity extends StatelessWidget {
-  final UserModels? user;
+  final UserModels? mySession;
   final ComunityServices comunity;
   final ComunityAction comunityAction;
   final Future<List<PostModels>> result;
 
   Comunity({super.key})
-      : user = UserSession().user,
+      : mySession = UserSession().user,
         comunity = ComunityServices(UserSession().user!),
         comunityAction = ComunityAction(UserSession().user!),
         result = ComunityServices(UserSession().user!).getAllPosts() {
-    assert(user != null, "User tidak boleh null!");
+    assert(mySession != null, "User tidak boleh null!");
   }
 // detail post
   @override
@@ -54,7 +54,7 @@ class Comunity extends StatelessWidget {
               if (index == 0) {
                 return SejenakHeaderPage(
                   text: "Post",
-                  profile: user!.user!.profil,
+                  profile: mySession!.user!.profil,
                 );
               }
 
@@ -80,7 +80,7 @@ class Comunity extends StatelessWidget {
           );
         },
       ),
-      endDrawer: SejenakSidebar(user: user),
+      endDrawer: SejenakSidebar(user: mySession),
       floatingActionButton: SejenakFloatingButton(
         onPressed: () => SejenakCreatePost(id: 1).showCreateContainer(context),
       ),
