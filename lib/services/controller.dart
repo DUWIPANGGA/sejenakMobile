@@ -6,11 +6,13 @@ class AuthFormController {
   final TextEditingController email = TextEditingController();
   final TextEditingController username = TextEditingController();
   final TextEditingController passwordVerification = TextEditingController();
+  final TextEditingController code = TextEditingController();
   void dispose() {
     name.dispose();
     password.dispose();
     email.dispose();
     username.dispose();
     passwordVerification.dispose();
+    code.dispose();
   }
 }

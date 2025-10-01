@@ -10,6 +10,8 @@ class API {
   static const String comunity = "$endpoint/comunity";
   static const String konselor = "$endpoint/konselor";
   static const String allPost = "$endpoint/comunity/getPost";
+  static const String verification = "$endpoint/verify-code";
+  static const String resendCode = "$endpoint/resend-verification";
 }
 
 abstract class HttpClient {
