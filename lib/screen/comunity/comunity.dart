@@ -10,6 +10,7 @@ import 'package:selena/app/partial/main/sejenak_sidebar.dart';
 import 'package:selena/app/partial/sejenak_navbar.dart';
 import 'package:selena/models/post_models/post_models.dart';
 import 'package:selena/models/user_models/user_models.dart';
+import 'package:selena/services/api.dart';
 import 'package:selena/services/comunity/comunity.dart';
 import 'package:selena/session/user_session.dart';
 
@@ -62,10 +63,11 @@ class Comunity extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: SejenakPostContainer(
-                    title: post.judul ?? "Judul Kosong",
-                    postImage: post.postPicture ?? "",
+                    title:  "Judul Kosong",
+                    postImage: "${API.endpointImage}/${post.postPicture}",
                     text: post.deskripsiPost ?? "Tidak ada konten",
                     likes: post.totalLike ?? 0,
+                    isAnonymous: post.isAnonymous ?? false,
                     comment: post.totalComment ?? 0,
                     name: post.username!,
                     isLike: post.isLiked ?? false,

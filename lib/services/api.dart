@@ -1,8 +1,9 @@
 import "package:dio/dio.dart";
 
 class API {
-  static const String endpoint = "https://sejenak.miomidev.com/api";
-  // static const String endpoint = "http://192.168.1.10:8000/api";
+  static const String endpoint = "https://sejenak.miomi.dev/api";
+  static const String endpointImage = "https://sejenak.miomi.dev/";
+  // static const String endpoint = "http://192.168.5.10:8000/api";
   static const String login = "$endpoint/login";
   static const String googleAuth = "$endpoint/googleAuth";
   static const String register = "$endpoint/register";

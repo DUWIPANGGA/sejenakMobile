@@ -36,25 +36,33 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        id: json['id'] as int?,
-        googleId: json['google_id'] as dynamic,
-        googleToken: json['google_token'] as dynamic,
-        googleRefreshToken: json['google_refresh_token'] as dynamic,
-        username: json['username'] as String?,
-        email: json['email'] as String?,
-        emailVerifiedAt: json['email_verified_at'] as dynamic,
-        premium: json['premium'] as int?,
-        profil: json['profil'] as dynamic,
-        deskripsiProfil: json['deskripsiProfil'] as dynamic,
-        name: json['name'] as String?,
-        isAhli: json['isAhli'] as int?,
-        role: json['role'] as String?,
+        id: json['id'] is int
+            ? json['id'] as int
+            : int.tryParse(json['id'].toString()),
+        googleId: json['google_id']?.toString(),
+        googleToken: json['google_token']?.toString(),
+        googleRefreshToken: json['google_refresh_token']?.toString(),
+        username: json['username']?.toString(),
+        email: json['email']?.toString(),
+        emailVerifiedAt: json['email_verified_at'] == null
+            ? null
+            : DateTime.tryParse(json['email_verified_at'].toString()),
+        premium: json['premium'] is int
+            ? json['premium'] as int
+            : int.tryParse(json['premium'].toString()),
+        profil: json['profil']?.toString(),
+        deskripsiProfil: json['deskripsiProfil']?.toString(),
+        name: json['name']?.toString(),
+        isAhli: json['isAhli'] is int
+            ? json['isAhli'] as int
+            : int.tryParse(json['isAhli'].toString()),
+        role: json['role']?.toString(),
         createdAt: json['created_at'] == null
             ? null
-            : DateTime.parse(json['created_at'] as String),
+            : DateTime.tryParse(json['created_at'].toString()),
         updatedAt: json['updated_at'] == null
             ? null
-            : DateTime.parse(json['updated_at'] as String),
+            : DateTime.tryParse(json['updated_at'].toString()),
       );
 
   Map<String, dynamic> toJson() => {

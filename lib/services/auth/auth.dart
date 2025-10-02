@@ -50,7 +50,7 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
                   response.data["user"] as Map<String, dynamic>)
               : null,
         ));
-        DioHttpClient.getInstance().setToken(response.data["token"]);
+        DioHttpClient.getInstance().setToken(response.data["access_token"]);
 
         Navigator.pushReplacementNamed(context, '/comunity');
       }
@@ -122,6 +122,7 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
         'password': formController.password.text,
         'password_confirmation': formController.passwordVerification.text,
       });
+      print("response : ${response.data}");
       if (response.statusCode == 200) {
         Navigator.push(
           context,

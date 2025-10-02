@@ -1,12 +1,12 @@
 class PostModels {
   int? postId;
+  bool? isAnonymous;
   String? postPicture;
   String? username;
-  String? judul;
+  String? deskripsiPost;
   int? totalLike;
   int? totalComment;
   bool? isLiked;
-  String? deskripsiPost;
   String? createdAt;
   String? updatedAt;
 
@@ -14,37 +14,37 @@ class PostModels {
     this.postId,
     this.postPicture,
     this.username,
-    this.judul,
+    this.deskripsiPost,
     this.totalLike,
+    this.isAnonymous,
     this.totalComment,
     this.isLiked,
-    this.deskripsiPost,
     this.createdAt,
     this.updatedAt,
   });
 
   factory PostModels.fromJson(Map<String, dynamic> json) => PostModels(
-        postId: json['postID'] as int?,
-        postPicture: json['post_picture'] as String?,
-        username: json['username'] as String?,
-        judul: json['judul'] as String?,
-        totalLike: json['totalLike'] as int?,
-        totalComment: json['totalComment'] as int?,
-        isLiked: json['isLiked'] as bool?,
-        deskripsiPost: json['deskripsiPost'] as String?,
+        postId: json['id'] as int?,
+        postPicture: json['image'] as String?,
+        username: json['user']?['username'] as String?, // ambil dari nested user
+        deskripsiPost: json['content'] as String?,
+        totalLike: (json['likes'] as List?)?.length ?? 0,
+        totalComment: (json['comments'] as List?)?.length ?? 0,
+        isLiked: json['isLiked'] as bool? ?? false, // default false kalau null
+        isAnonymous: json['is_anonymous'] as bool? ?? false, // default false kalau null
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
-        'postID': postId,
-        'post_picture': postPicture,
+        'id': postId,
+        'image': postPicture,
         'username': username,
-        'judul': judul,
+        'content': deskripsiPost,
         'totalLike': totalLike,
         'totalComment': totalComment,
         'isLiked': isLiked,
-        'deskripsiPost': deskripsiPost,
+        'isAnonymous': isAnonymous,
         'created_at': createdAt,
         'updated_at': updatedAt,
       };
