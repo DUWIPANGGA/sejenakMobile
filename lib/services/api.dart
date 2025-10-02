@@ -2,7 +2,7 @@ import "package:dio/dio.dart";
 
 class API {
   static const String endpoint = "https://sejenak.miomidev.com/api";
-  // static const String endpoint = "http://192.168.1.10:8000/api";
+  // static const String endpoint = "http://192.168.1.20:8000/api";
   static const String login = "$endpoint/login";
   static const String googleAuth = "$endpoint/googleAuth";
   static const String register = "$endpoint/register";
@@ -27,9 +27,30 @@ class DioHttpClient implements HttpClient {
   DioHttpClient._internal()
       : _dio = Dio(BaseOptions(
           baseUrl: API.endpoint,
-          connectTimeout: const Duration(seconds: 10),
-          receiveTimeout: const Duration(seconds: 10),
-        ));
+          connectTimeout: const Duration(seconds: 30), // Diperpanjang
+          receiveTimeout: const Duration(seconds: 30), // Diperpanjang
+        )) {
+    // Tambahkan interceptor untuk logging dan error handling
+    _dio.interceptors.add(InterceptorsWrapper(
+      onRequest: (options, handler) {
+        print('🌐 Sending ${options.method} request to ${options.uri}');
+        print('📦 Data: ${options.data}');
+        return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        print('✅ Response received: ${response.statusCode}');
+        print('📋 Data: ${response.data}');
+        return handler.next(response);
+      },
+      onError: (DioException e, handler) {
+        print('❌ Dio Error: ${e.type}');
+        print('📝 Message: ${e.message}');
+        print('🔍 Response: ${e.response?.data}');
+        print('📊 Status: ${e.response?.statusCode}');
+        return handler.next(e);
+      },
+    ));
+  }
 
   factory DioHttpClient.getInstance() {
     return _instance;
@@ -39,37 +60,82 @@ class DioHttpClient implements HttpClient {
   void setToken(String token) {
     _authToken = token;
     _dio.options.headers["Authorization"] = "Bearer $token";
+    print('🔑 Authentication token set');
   }
 
-  /// **GET Request**
-  @override
-  Future<Response> get(String url, {Map<String, dynamic>? data}) {
-    return _dio.get(url, queryParameters: data, options: _getOptions());
+  /// **Clear Token saat logout**
+  void clearToken() {
+    _authToken = '';
+    _dio.options.headers.remove("Authorization");
+    print('🔒 Authentication token cleared');
   }
 
-  /// **POST Request**
+  /// **GET Request dengan error handling**
   @override
-  Future<Response> post(String url, {Map<String, dynamic>? data}) {
-    return _dio.post(url, data: data, options: _getOptions());
+  Future<Response> get(String url, {Map<String, dynamic>? data}) async {
+    try {
+      return await _dio.get(url, queryParameters: data, options: _getOptions());
+    } on DioException catch (e) {
+      _logDetailedError(e, url, 'GET');
+      rethrow;
+    }
   }
 
-  /// **PUT Request**
+  /// **POST Request dengan error handling**
   @override
-  Future<Response> put(String url, {Map<String, dynamic>? data}) {
-    return _dio.put(url, data: data, options: _getOptions());
+  Future<Response> post(String url, {Map<String, dynamic>? data}) async {
+    try {
+      return await _dio.post(url, data: data, options: _getOptions());
+    } on DioException catch (e) {
+      _logDetailedError(e, url, 'POST');
+      rethrow;
+    }
   }
 
-  /// **DELETE Request**
+  /// **PUT Request dengan error handling**
   @override
-  Future<Response> delete(String url, {Map<String, dynamic>? data}) {
-    return _dio.delete(url, data: data, options: _getOptions());
+  Future<Response> put(String url, {Map<String, dynamic>? data}) async {
+    try {
+      return await _dio.put(url, data: data, options: _getOptions());
+    } on DioException catch (e) {
+      _logDetailedError(e, url, 'PUT');
+      rethrow;
+    }
+  }
+
+  /// **DELETE Request dengan error handling**
+  @override
+  Future<Response> delete(String url, {Map<String, dynamic>? data}) async {
+    try {
+      return await _dio.delete(url, data: data, options: _getOptions());
+    } on DioException catch (e) {
+      _logDetailedError(e, url, 'DELETE');
+      rethrow;
+    }
   }
 
   Options _getOptions() {
-    return Options(headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json",
-      if (_authToken.isNotEmpty) "Authorization": "Bearer $_authToken"
-    });
+    return Options(
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        if (_authToken.isNotEmpty) "Authorization": "Bearer $_authToken"
+      },
+      sendTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+    );
+  }
+
+  void _logDetailedError(DioException e, String url, String method) {
+    print('''
+🚨 HTTP ERROR DETAILS
+=====================
+Request: $method $url
+Error Type: ${e.type}
+Message: ${e.message}
+Status Code: ${e.response?.statusCode ?? 'N/A'}
+Response Data: ${e.response?.data ?? 'No response data'}
+Request Data: ${e.requestOptions.data}
+    ''');
   }
 }
