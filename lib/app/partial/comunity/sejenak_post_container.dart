@@ -11,6 +11,7 @@ class SejenakPostContainer extends StatefulWidget {
   final String postImage;
   final int likes;
   final bool isLike;
+  final bool isAnonymous;
   final bool isMe;
   final int comment;
   final VoidCallback commentAction;
@@ -21,6 +22,7 @@ class SejenakPostContainer extends StatefulWidget {
     required this.title,
     required this.text,
     this.name = 'anonimus',
+    this.isAnonymous = false,
     this.date = 'jan 1, 2000',
     this.postImage = '',
     this.likes = 0,
@@ -105,7 +107,8 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                     ),
                   ),
                 ),
-                Container(
+                widget.postImage == ""
+                ? Container(
                   height: 110,
                   width: 113,
                   child: Stack(
@@ -137,7 +140,7 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                       )
                     ],
                   ),
-                ),
+                ):SizedBox(),
               ],
             ),
             Padding(
@@ -149,12 +152,31 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                     child: Row(
                       children: [
                         ClipOval(
-                          child: Image.network(
-                            widget.postImage,
-                            width: 30,
-                            height: 30,
-                            fit: BoxFit.cover,
-                          ),
+                          child: widget.isAnonymous
+                              ? Container(
+                                  width: 30,
+                                  height: 30,
+                                  color: SejenakColor.light,
+                                  child: Icon(
+                                    Icons.no_accounts,
+                                    size: 20,
+                                    color: SejenakColor.stroke,
+                                  ),
+                                )
+                              : Image.network(
+                                  widget.postImage,
+                                  width: 30,
+                                  height: 30,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: 30,
+                                      height: 30,
+                                      color: SejenakColor.light,
+                                      child: Icon(Icons.person, size: 20),
+                                    );
+                                  },
+                                ),
                         ),
                         SizedBox(width: 8),
                         Expanded(
@@ -163,7 +185,9 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SejenakText(
-                                text: widget.name,
+                                text: widget.isAnonymous
+                                    ? 'Anonymous'
+                                    : widget.name,
                                 type: SejenakTextType.regular,
                                 maxLines: 1,
                               ),

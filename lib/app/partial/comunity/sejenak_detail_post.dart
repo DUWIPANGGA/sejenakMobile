@@ -105,7 +105,7 @@ class SejenakDetailPost {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SejenakText(
-                                      text: post.judul ?? 'No Title',
+                                      text:  'No Title',
                                       type: SejenakTextType.h4,
                                       textAlign: TextAlign.left,
                                     ),

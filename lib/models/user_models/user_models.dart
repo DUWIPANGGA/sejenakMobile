@@ -7,13 +7,26 @@ class UserModels {
   final String? status;
   final String? token;
   final User? user;
-
-  const UserModels({this.code, this.status, this.token, this.user});
+  final String? refreshToken;
+  final int? expiresIn;
+  final int? refreshExpiresIn;
+  const UserModels({
+    this.code,
+    this.status,
+    this.token,
+    this.refreshToken,
+    this.expiresIn,
+    this.refreshExpiresIn,
+    this.user,
+  });
 
   factory UserModels.fromJson(Map<String, dynamic> json) => UserModels(
         code: json['code'] as int?,
         status: json['status'] as String?,
-        token: json['token'] as String?,
+        token: json['access_token'] as String?,
+        refreshToken: json['refresh_token'] as String?,
+        expiresIn: json['expires_in'] as int?,
+        refreshExpiresIn: json['refresh_expires_in'] as int?,
         user: json['user'] == null
             ? null
             : User.fromJson(json['user'] as Map<String, dynamic>),

@@ -36,7 +36,7 @@ class ComunityServices implements IPostRepository {
   @override
   Future<void> createPost(PostModels post) async {
     _posts.add(post);
-    print("Post berhasil dibuat: ${post.judul}");
+    print("Post berhasil dibuat: ${post.deskripsiPost}");
   }
 
   @override
@@ -48,21 +48,21 @@ class ComunityServices implements IPostRepository {
   Future<List<PostModels>> getAllPosts() async {
     try {
       final response = await DioHttpClient.getInstance().get(
-        API.allPost,
+        API.comunity,
         data: {
           "username": user.user!.username,
         },
       );
-      print("Response: ${response.data['body']['post']}");
-      if (response.data['body']['post'] is List) {
-        _posts = PostModels.fromJsonList(response.data['body']['post']);
+      print("Response: ${response.data}");
+      if (response.data['posts'] is List) {
+        _posts = PostModels.fromJsonList(response.data['posts']);
         print("Response: ${_posts}");
         return _posts;
       } else {
         throw Exception("Unexpected response format");
       }
     } on DioException catch (e) {
-      print("Dio Error: ${e.message}");
+      // print("Dio Error: ${e.message}");
       throw Exception("Failed to load posts: ${e.response?.statusCode}");
     }
   }
@@ -72,7 +72,7 @@ class ComunityServices implements IPostRepository {
     int index = _posts.indexWhere((p) => p.postId == post.postId);
     if (index != -1) {
       _posts[index] = post;
-      print("Post berhasil diperbarui: ${post.judul}");
+      print("Post berhasil diperbarui: ${post.deskripsiPost}");
     }
   }
 

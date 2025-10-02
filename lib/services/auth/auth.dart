@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:selena/models/user_models/user.dart' as models;
+import 'package:selena/screen/auth/verification.dart';
 
 import '../../app/components/sejenak_error.dart';
 import '../../models/user_models/user_models.dart';
@@ -17,6 +18,7 @@ abstract class SejenakAuth {
 
 abstract class AuthWithRegister {
   Future<void> register(BuildContext context);
+  Future<void> verification(BuildContext context);
 }
 
 class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
@@ -48,7 +50,7 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
                   response.data["user"] as Map<String, dynamic>)
               : null,
         ));
-        DioHttpClient.getInstance().setToken(response.data["token"]);
+        DioHttpClient.getInstance().setToken(response.data["access_token"]);
 
         Navigator.pushReplacementNamed(context, '/comunity');
       }
@@ -64,6 +66,52 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
   }
 
   @override
+  Future<void> verification(BuildContext context) async {
+    print("code: ${formController.code.text}");
+
+    try {
+      final response = await DioHttpClient.getInstance().post(
+        API.verification,
+        data: {
+          "code": formController.code.text,
+          "email": formController.email.text,
+        },
+      );
+
+      print("Response: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+        // Proses data user
+        UserSession().setUser(UserModels(
+          code: response.data["code"] ?? "",
+          status: response.data["status"] ?? "",
+          token: response.data["token"] ?? "",
+          user: response.data["user"] is Map<String, dynamic>
+              ? models.User.fromJson(
+                  response.data["user"] as Map<String, dynamic>)
+              : null,
+        ));
+        DioHttpClient.getInstance().setToken(response.data["token"]);
+
+        Navigator.pushReplacementNamed(context, '/comunity');
+      } else {
+        showErrorDialog(context, "Login gagal! Silakan coba lagi!");
+        print(
+            "Error: Status code bukan 200, status code: ${response.statusCode}");
+      }
+    } catch (e) {
+      if (e is DioException) {
+        print("Dio Error: ${e.response?.statusCode}");
+        print("Message: ${e.response?.data}");
+        showErrorDialog(context, "Login gagal! Silakan coba lagi!");
+      } else {
+        print("Error: $e");
+        showErrorDialog(context, "Terjadi kesalahan! Silakan coba lagi.");
+      }
+    }
+  }
+
+  @override
   Future<void> register(BuildContext context) async {
     try {
       final response =
@@ -74,8 +122,16 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
         'password': formController.password.text,
         'password_confirmation': formController.passwordVerification.text,
       });
+      print("response : ${response.data}");
       if (response.statusCode == 200) {
-        Navigator.pushReplacementNamed(context, '/login');
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => VerificationScreen(
+              authFormController: formController,
+            ),
+          ),
+        );
       }
     } catch (e) {
       if (e is DioException) {
