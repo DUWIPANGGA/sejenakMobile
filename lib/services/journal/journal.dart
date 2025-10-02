@@ -19,8 +19,8 @@ class JournalApiService implements JournalService {
   Future<List<JournalModels>> getAllJournal() async {
     try {
       final response = await DioHttpClient.getInstance().get(
-        API.jurnal,
-        data: {"action": "all"},
+        API.journal,
+        queryParameters: {"action": "all"},
       );
       print("Response: ${response.data['body']}");
       if (response.data['body'] is List) {

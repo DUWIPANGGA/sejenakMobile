@@ -1,19 +1,27 @@
+import 'package:selena/models/post_likes/post_likes.dart';
+import 'package:selena/models/user_models/user.dart';
+
 class PostModels {
   int? postId;
   bool? isAnonymous;
+  String? title;
   String? postPicture;
-  String? username;
   String? deskripsiPost;
   int? totalLike;
   int? totalComment;
   bool? isLiked;
   String? createdAt;
   String? updatedAt;
+  User? user;
+  List<LikeModel>? likes;
+  bool isLikedByMe(int? currentUserId) {
+    return likes?.any((like) => like.userId == currentUserId) ?? false;
+  }
 
   PostModels({
     this.postId,
     this.postPicture,
-    this.username,
+    this.title,
     this.deskripsiPost,
     this.totalLike,
     this.isAnonymous,
@@ -21,25 +29,31 @@ class PostModels {
     this.isLiked,
     this.createdAt,
     this.updatedAt,
+    this.user,
+    this.likes,
   });
 
   factory PostModels.fromJson(Map<String, dynamic> json) => PostModels(
         postId: json['id'] as int?,
         postPicture: json['image'] as String?,
-        username: json['user']?['username'] as String?, // ambil dari nested user
+        title: json['title'] as String?,
         deskripsiPost: json['content'] as String?,
         totalLike: (json['likes'] as List?)?.length ?? 0,
         totalComment: (json['comments'] as List?)?.length ?? 0,
-        isLiked: json['isLiked'] as bool? ?? false, // default false kalau null
-        isAnonymous: json['is_anonymous'] as bool? ?? false, // default false kalau null
+        isLiked: json['isLiked'] as bool? ?? false,
+        isAnonymous: json['is_anonymous'] as bool? ?? false,
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
+        user: json['user'] != null ? User.fromJson(json['user']) : null,
+        likes: (json['likes'] as List?)
+            ?.map((e) => LikeModel.fromJson(e))
+            .toList(),
       );
 
   Map<String, dynamic> toJson() => {
         'id': postId,
         'image': postPicture,
-        'username': username,
+        'title': title,
         'content': deskripsiPost,
         'totalLike': totalLike,
         'totalComment': totalComment,
@@ -47,6 +61,8 @@ class PostModels {
         'isAnonymous': isAnonymous,
         'created_at': createdAt,
         'updated_at': updatedAt,
+        'user': user?.toJson(),
+        'likes': likes?.map((e) => e.toJson()).toList(),
       };
 
   static List<PostModels> fromJsonList(dynamic jsonList) {

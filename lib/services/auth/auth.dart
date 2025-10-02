@@ -19,6 +19,7 @@ abstract class SejenakAuth {
 abstract class AuthWithRegister {
   Future<void> register(BuildContext context);
   Future<void> verification(BuildContext context);
+  Future<void> resendCode(BuildContext context);
 }
 
 class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
@@ -65,6 +66,39 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
     }
   }
 
+  @override
+  Future<void> resendCode(BuildContext context) async {
+    print("code: ${formController.code.text}");
+
+    try {
+      final response = await DioHttpClient.getInstance().post(
+        API.resendCode,
+        data: {
+          "email": formController.email.text,
+        },
+      );
+
+      print("Response: ${response.data}");
+
+      if (response.statusCode == 200 && response.data != null) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Resend berhasil")),
+  );
+} else {
+  showErrorDialog(context, "Login gagal! Silakan coba lagi!");
+  print("Error: Status code bukan 200, status code: ${response.statusCode}");
+}
+    } catch (e) {
+      if (e is DioException) {
+        print("Dio Error: ${e.response?.statusCode}");
+        print("Message: ${e.response?.data}");
+        showErrorDialog(context, "Login gagal! Silakan coba lagi!");
+      } else {
+        print("Error: $e");
+        showErrorDialog(context, "Terjadi kesalahan! Silakan coba lagi.");
+      }
+    }
+  }
   @override
   Future<void> verification(BuildContext context) async {
     print("code: ${formController.code.text}");
@@ -123,7 +157,7 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
         'password_confirmation': formController.passwordVerification.text,
       });
       print("response : ${response.data}");
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
         Navigator.push(
           context,
           MaterialPageRoute(

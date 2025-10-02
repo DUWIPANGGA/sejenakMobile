@@ -16,7 +16,7 @@ abstract class IPostRepository {
 
 abstract class DetailAction {
   Future<void> likePost(bool isLike, int id);
-  Future<void> commentPost(int id, TextEditingController comment);
+  Future<void> commentPost(int id, TextEditingController commentController);
   Future<void> replyCommentPost(int id, TextEditingController comment);
   Future<List<PostCommentModels>> getCommentPost(int id);
 }
@@ -48,8 +48,8 @@ class ComunityServices implements IPostRepository {
   Future<List<PostModels>> getAllPosts() async {
     try {
       final response = await DioHttpClient.getInstance().get(
-        API.comunity,
-        data: {
+        API.community,
+        queryParameters:{
           "username": user.user!.username,
         },
       );
@@ -90,11 +90,9 @@ class ComunityAction implements DetailAction {
   Future<void> likePost(bool isLiked, int id) async {
     try {
       final response = await DioHttpClient.getInstance().post(
-        API.comunity,
+        API.communityLikeToggle,
         data: {
-          "action": "like",
-          "id": id,
-          "username": user.user?.username,
+          "post_id": id,
         },
       );
       print("Response: ${response.data}");
@@ -110,34 +108,36 @@ class ComunityAction implements DetailAction {
   }
 
   @override
-  Future<void> commentPost(int id, TextEditingController comment) async {
-    try {
-      final response = await DioHttpClient.getInstance().post(
-        API.comunity,
-        data: {
-          "action": "comment",
-          "id": id,
-          "username": user.user?.username,
-          "value": comment.text
-        },
-      );
-      print("Response: ${response.data}");
-      if (response.data['code'] == 200) {
-        print(response.data['code']);
-      } else {
-        throw Exception("Unexpected response format");
-      }
-    } on DioException catch (e) {
-      print("Dio Error: ${e.message}");
-      throw Exception("Failed to load posts: ${e.response?.statusCode}");
+  Future<void> commentPost(int postId, TextEditingController commentController) async {
+  try {
+    final response = await DioHttpClient.getInstance().post(
+      API.communityComments,
+      data: {
+        "post_id": postId,
+        "content": commentController.text
+      },
+    );
+    
+    print("Response: ${response.data}");
+    
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print("Comment posted successfully");
+      commentController.clear(); // Clear input setelah berhasil
+    } else {
+      throw Exception("Failed to post comment: ${response.statusCode}");
     }
+  } on DioException catch (e) {
+    print("Dio Error: ${e.message}");
+    print("Error Response: ${e.response?.data}");
+    throw Exception("Failed to post comment: ${e.response?.statusCode ?? 'Network error'}");
   }
+}
 
   @override
   Future<void> replyCommentPost(int id, TextEditingController comment) async {
     try {
       final response = await DioHttpClient.getInstance().post(
-        API.comunity,
+        API.community,
         data: {
           "action": "reply",
           "id": id,
@@ -160,13 +160,8 @@ class ComunityAction implements DetailAction {
   @override
   Future<List<PostCommentModels>> getCommentPost(int id) async {
     try {
-      final response = await DioHttpClient.getInstance().post(
-        API.comunity,
-        data: {
-          "action": "detail",
-          "id": id,
-          "username": user.user?.username,
-        },
+      final response = await DioHttpClient.getInstance().get(
+        API.communityCommentDetail(id),
       );
       print("Response: ${response.data['body']['comment']}");
       if (response.data['code'] == 200) {

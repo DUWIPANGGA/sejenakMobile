@@ -34,7 +34,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
         codeControllers.map((controller) => controller.text).join();
     widget.authFormController.code.text = verificationCode;
 
-    await Future.delayed(const Duration(seconds: 2));
 
     setState(() => isLoading = false);
 
@@ -46,6 +45,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
       //   SnackBar(content: Text('Verifikasi berhasil! Kode: $verificationCode')),
       // );
     }
+  }
+  Future<void> handleResendCode() async {
+    setState(() => isLoading = true);
+      auth = SejenakApiAuthService(widget.authFormController);
+      // ignore: use_build_context_synchronously
+      auth.resendCode(context);
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   SnackBar(content: Text('Verifikasi berhasil! Kode: $verificationCode')),
+      // );
+    setState(() => isLoading = false);
   }
 
   void _onCodeChanged(String value, int index) {
@@ -136,7 +145,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: List.generate(6, (index) {
                         return SizedBox(
-                          width: 50,
+                          width: 40,
                           height: 50,
                           child: TextField(
                             controller: codeControllers[index],

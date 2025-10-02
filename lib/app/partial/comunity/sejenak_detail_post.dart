@@ -8,6 +8,7 @@ import 'package:selena/app/partial/main/sejenak_error.dart';
 import 'package:selena/models/post_comment_models/post_comment_models.dart';
 import 'package:selena/models/post_models/post_models.dart';
 import 'package:selena/root/sejenak_color.dart';
+import 'package:selena/services/api.dart';
 import 'package:selena/services/comunity/comunity.dart';
 import 'package:selena/session/user_session.dart';
 
@@ -105,7 +106,7 @@ class SejenakDetailPost {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     SejenakText(
-                                      text:  'No Title',
+                                      text:  post.title ?? 'No Title',
                                       type: SejenakTextType.h4,
                                       textAlign: TextAlign.left,
                                     ),
@@ -132,7 +133,7 @@ class SejenakDetailPost {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               SejenakText(
-                                                text: post.username ??
+                                                text: post.user!.username! ??
                                                     'Anonymous',
                                                 type: SejenakTextType.regular,
                                                 maxLines: 1,
@@ -160,7 +161,7 @@ class SejenakDetailPost {
                                         decoration: BoxDecoration(
                                           image: DecorationImage(
                                             image: NetworkImage(
-                                              post.postPicture ?? '',
+                                              post.postPicture==null?"":"${API.endpointImage}storage/${post.postPicture}",
                                             ),
                                             fit: BoxFit.cover,
                                           ),

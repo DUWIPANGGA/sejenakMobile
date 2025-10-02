@@ -5,6 +5,7 @@ import 'package:selena/root/sejenak_color.dart';
 
 class SejenakPostContainer extends StatefulWidget {
   final String title;
+  final String profile;
   final String text;
   final String name;
   final String date;
@@ -26,6 +27,7 @@ class SejenakPostContainer extends StatefulWidget {
     this.date = 'jan 1, 2000',
     this.postImage = '',
     this.likes = 0,
+    this.profile = "",
     this.comment = 0,
     this.isLike = false,
     required this.commentAction,
@@ -108,7 +110,7 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                   ),
                 ),
                 widget.postImage == ""
-                ? Container(
+                ? SizedBox():Container(
                   height: 110,
                   width: 113,
                   child: Stack(
@@ -140,7 +142,7 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                       )
                     ],
                   ),
-                ):SizedBox(),
+                ),
               ],
             ),
             Padding(
@@ -163,8 +165,8 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                                     color: SejenakColor.stroke,
                                   ),
                                 )
-                              : Image.network(
-                                  widget.postImage,
+                              : widget.profile == ""?Image.network(
+                                  widget.profile,
                                   width: 30,
                                   height: 30,
                                   fit: BoxFit.cover,
@@ -176,7 +178,12 @@ class _SejenakPostContainerState extends State<SejenakPostContainer> {
                                       child: Icon(Icons.person, size: 20),
                                     );
                                   },
-                                ),
+                                ):Container(
+                                      width: 30,
+                                      height: 30,
+                                      color: SejenakColor.light,
+                                      child: Icon(Icons.person, size: 20),
+                                    ),
                         ),
                         SizedBox(width: 8),
                         Expanded(

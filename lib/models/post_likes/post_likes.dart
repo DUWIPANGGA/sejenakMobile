@@ -1,31 +1,35 @@
-class PostLikes {
-  int? likeId;
+class LikeModel {
+  int? id;
+  int? userId;
   int? postId;
-  String? username;
+  int? commentId;
   String? createdAt;
   String? updatedAt;
 
-  PostLikes({
-    this.likeId,
+  LikeModel({
+    this.id,
+    this.userId,
     this.postId,
-    this.username,
+    this.commentId,
     this.createdAt,
     this.updatedAt,
   });
 
-  factory PostLikes.fromJson(Map<String, dynamic> json) => PostLikes(
-        likeId: json['likeID'] as int?,
-        postId: json['postID'] as int?,
-        username: json['username'] as String?,
+  factory LikeModel.fromJson(Map<String, dynamic> json) => LikeModel(
+        id: json['id'] as int?,
+        userId: json['user_id'] as int?,
+        postId: json['post_id'] as int?,
+        commentId: json['comment_id'] as int?,
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
-        'likeID': likeId,
-        'postID': postId,
-        'username': username,
-        'created_at': createdAt,
-        'updated_at': updatedAt,
+        "id": id,
+        "user_id": userId,
+        "post_id": postId,
+        "comment_id": commentId,
+        "created_at": createdAt,
+        "updated_at": updatedAt,
       };
 }
