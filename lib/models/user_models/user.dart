@@ -5,6 +5,7 @@ class User {
   final dynamic googleId;
   final dynamic googleToken;
   final dynamic googleRefreshToken;
+  final String? avatar;
   final String? username;
   final String? email;
   final dynamic emailVerifiedAt;
@@ -22,6 +23,7 @@ class User {
     this.googleId,
     this.googleToken,
     this.googleRefreshToken,
+    this.avatar,
     this.username,
     this.email,
     this.emailVerifiedAt,
@@ -44,6 +46,7 @@ class User {
         googleRefreshToken: json['google_refresh_token']?.toString(),
         username: json['username']?.toString(),
         email: json['email']?.toString(),
+        avatar: json['avatar']?.toString(),
         emailVerifiedAt: json['email_verified_at'] == null
             ? null
             : DateTime.tryParse(json['email_verified_at'].toString()),
@@ -72,6 +75,7 @@ class User {
         'google_refresh_token': googleRefreshToken,
         'username': username,
         'email': email,
+        'avatar': avatar,
         'email_verified_at': emailVerifiedAt,
         'premium': premium,
         'profil': profil,

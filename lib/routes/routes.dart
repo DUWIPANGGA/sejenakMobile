@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:selena/screen/auth/verification.dart';
 import 'package:selena/screen/journal/journal.dart';
+import 'package:selena/screen/landing_page/landing_page.dart';
 
 import '/screen/auth/login.dart';
 import '/screen/auth/register.dart';
@@ -16,5 +17,6 @@ class SejenakRoute {
     '/register': (context) => RegisterScreen(),
     '/chat': (context) => Chat(),
     '/journal': (context) => Journal(),
+    '/landing-page': (context) => LandingPage(),
   };
 }

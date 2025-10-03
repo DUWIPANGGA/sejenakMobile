@@ -5,6 +5,7 @@ import 'package:selena/app/components/sejenak_primary_button.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/services/auth/auth.dart';
+import 'package:selena/session/user_session.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
@@ -16,7 +17,14 @@ class LandingPage extends StatefulWidget {
 class _LandingPageState extends State<LandingPage> {
   final GoogleAuthService googleAuth = GoogleAuthService();
   bool isLoading = false;
-
+  void _loadUserSession() async {
+    await UserSession().loadUserFromPrefs();
+print("user is login = ${UserSession().isLoggedIn}");
+    if (UserSession().isLoggedIn) {
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/comunity'); // ganti dengan route utama
+    }
+  }
   void handleGoogleLogin() async {
     setState(() {
       isLoading = true;
@@ -26,7 +34,12 @@ class _LandingPageState extends State<LandingPage> {
       isLoading = false;
     });
   }
+@override
+void initState() {
 
+  super.initState();
+_loadUserSession();  
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(

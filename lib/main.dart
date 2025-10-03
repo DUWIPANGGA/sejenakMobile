@@ -3,19 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:selena/firebase_options.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/screen/landing_page/landing_page.dart';
+import 'package:selena/session/user_session.dart';
 
 import 'routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MainApp());
+  runApp(MainApp());
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  final isLoggedIn = UserSession().isLoggedIn;
+  MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +56,7 @@ class MainApp extends StatelessWidget {
         }
         return null;
       },
-      home: LandingPage(),
+       home: LandingPage(),
     );
   }
 }

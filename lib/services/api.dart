@@ -1,10 +1,14 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:selena/session/user_session.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class API {
   static const String endpoint = "https://sejenak.miomi.dev/api";
   static const String endpointImage = "https://sejenak.miomi.dev/";
   // static const String endpoint = "http://192.168.5.10:8000/api";
-  
+
   // Authentication
   static const String login = "$endpoint/login";
   static const String register = "$endpoint/register";
@@ -12,28 +16,29 @@ class API {
   static const String getProfile = "$endpoint/me";
   static const String refreshToken = "$endpoint/refresh";
   static const String logout = "$endpoint/logout";
-  
+
   // Verification
   static const String verification = "$endpoint/verify-code";
   static const String resendCode = "$endpoint/resend-verification";
-  
+
   // Journal
   static const String journal = "$endpoint/journal";
   static String journalDetail(int id) => "$journal/$id";
   static const String journalSearch = "$journal/search";
   static const String journalStats = "$journal/stats";
-  
+
   // Moods
   static const String moods = "$endpoint/moods";
   static String moodDetail(int id) => "$moods/$id";
   static const String moodStatistics = "$moods/statistics";
-  
+
   // Audios
   static const String audios = "$endpoint/audios";
   static String audioDetail(int id) => "$audios/$id";
-  static String audioByCategory(String category) => "$audios/category/$category";
+  static String audioByCategory(String category) =>
+      "$audios/category/$category";
   static String playAudio(int id) => "$audios/$id/play";
-  
+
   // Community (Note: ada typo di Postman - 'comunity' seharusnya 'community')
   static const String community = "$endpoint/comunity";
   static const String communityComments = "$community/comments";
@@ -43,19 +48,19 @@ class API {
   static String communityLikeDetail(int id) => "$communityLikes/$id";
   static const String communityLikeToggle = "$communityLikes/toggle";
   static const String allPost = "$community/getPost";
-  
+
   // Konselor
   static const String konselor = "$endpoint/konselor";
-  
+
   // Dashboard & Profile
   static const String dashboard = "$endpoint/dashboard";
   static const String profile = "$endpoint/profile";
   static const String updateProfile = "$profile/update";
-  
+
   // Meditation
   static const String meditationDaily = "$endpoint/meditation/daily";
   static const String meditationAudios = "$endpoint/meditation/audios";
-  
+
   // Midtrans
   static const String midtransCallback = "$endpoint/midtrans/callback";
 }
@@ -89,77 +94,81 @@ class DioHttpClient implements HttpClient {
   void _setupInterceptors() {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
-        print('🌐 Sending ${options.method} request to ${options.uri}');
+        print('Sending ${options.method} request to ${options.uri}');
         if (options.data is FormData) {
-          print('📦 FormData with fields: ${options.data.fields}');
+          print('FormData with fields: ${options.data.fields}');
           if (options.data.files.isNotEmpty) {
-            print('📎 Files: ${options.data.files.map((f) => f.key).toList()}');
+            print('Files: ${options.data.files.map((f) => f.key).toList()}');
           }
         } else {
-          print('📦 Data: ${options.data}');
+          print('Data: ${options.data}');
         }
         return handler.next(options);
       },
       onResponse: (response, handler) {
-        print('✅ Response received: ${response.statusCode}');
-        print('📋 Data: ${response.data}');
+        print('Response received: ${response.statusCode}');
+        print('Data: ${response.data}');
         return handler.next(response);
       },
       onError: (DioException e, handler) {
-        print('❌ Dio Error: ${e.type}');
-        print('📝 Message: ${e.message}');
-        print('🔍 Response: ${e.response?.data}');
-        print('📊 Status: ${e.response?.statusCode}');
+        print('Dio Error: ${e.type}');
+        print('Message: ${e.message}');
+        print('Response: ${e.response?.data}');
+        print('Status: ${e.response?.statusCode}');
+
+        // Jika status 401, lakukan redirect ke landing page
+        if (e.response?.statusCode == 401) {
+          _handleUnauthorized();
+        }
+
         return handler.next(e);
       },
     ));
   }
 
-  /// **Set Token setelah login**
+  void _handleUnauthorized() async {
+    await UserSession().clearUser();
+
+    navigatorKey.currentState?.pushNamedAndRemoveUntil(
+      '/landing-page',
+      (route) => false,
+    );
+  }
+
   void setToken(String token) {
     _authToken = token;
     _dio.options.headers["Authorization"] = "Bearer $token";
     print('🔑 Authentication token set');
   }
 
-  /// **Clear Token saat logout**
   void clearToken() {
     _authToken = '';
     _dio.options.headers.remove("Authorization");
     print('🔒 Authentication token cleared');
   }
 
-  /// **GET Request dengan error handling**
   @override
-  Future<Response> get(String url, {Map<String, dynamic>? queryParameters}) async {
+  Future<Response> get(String url,
+      {Map<String, dynamic>? queryParameters}) async {
     try {
-      return await _dio.get(
-        url,
-        queryParameters: queryParameters, 
-        options: _getOptions()
-      );
+      return await _dio.get(url,
+          queryParameters: queryParameters, options: _getOptions());
     } on DioException catch (e) {
       _logDetailedError(e, url, 'GET');
       rethrow;
     }
   }
 
-  /// **POST Request dengan error handling**
   @override
   Future<Response> post(String url, {dynamic data}) async {
     try {
-      return await _dio.post(
-        url, 
-        data: data, 
-        options: _getOptions()
-      );
+      return await _dio.post(url, data: data, options: _getOptions());
     } on DioException catch (e) {
       _logDetailedError(e, url, 'POST');
       rethrow;
     }
   }
 
-  /// **POST FormData untuk upload file**
   @override
   Future<Response> postFormData(String url, FormData formData) async {
     try {
@@ -181,30 +190,20 @@ class DioHttpClient implements HttpClient {
     }
   }
 
-  /// **PUT Request dengan error handling**
   @override
   Future<Response> put(String url, {dynamic data}) async {
     try {
-      return await _dio.put(
-        url, 
-        data: data, 
-        options: _getOptions()
-      );
+      return await _dio.put(url, data: data, options: _getOptions());
     } on DioException catch (e) {
       _logDetailedError(e, url, 'PUT');
       rethrow;
     }
   }
 
-  /// **DELETE Request dengan error handling**
   @override
   Future<Response> delete(String url, {dynamic data}) async {
     try {
-      return await _dio.delete(
-        url, 
-        data: data, 
-        options: _getOptions()
-      );
+      return await _dio.delete(url, data: data, options: _getOptions());
     } on DioException catch (e) {
       _logDetailedError(e, url, 'DELETE');
       rethrow;
