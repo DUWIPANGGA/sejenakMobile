@@ -53,7 +53,7 @@ class ComunityServices implements IPostRepository {
           "username": user.user!.username,
         },
       );
-      print("Response: ${response.data}");
+      print("Response: ${response.data}");  
       if (response.data['posts'] is List) {
         _posts = PostModels.fromJsonList(response.data['posts']);
         print("Response: ${_posts}");

@@ -10,5 +10,6 @@ class SejenakColor {
   static const Color light = Color(0xFFFFFFFF);
   static const Color primary = Color(0xFFE4DBA2);
   static const Color secondary = Color(0xFFA4BC42);
+  static const Color error = Color(0xFFFF6600);
   static const Color accent = Color(0xFFFF6600);
 }

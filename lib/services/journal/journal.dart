@@ -16,25 +16,31 @@ class JournalApiService implements JournalService {
   late List<JournalModels> _journals;
 
   @override
-  Future<List<JournalModels>> getAllJournal() async {
-    try {
-      final response = await DioHttpClient.getInstance().get(
-        API.journal,
-        queryParameters: {"action": "all"},
-      );
-      print("Response: ${response.data['body']}");
-      if (response.data['body'] is List) {
-        _journals = JournalModels.fromJsonList(response.data['body']);
-        print("Response: ${_journals}");
-        return _journals;
-      } else {
-        throw Exception("Unexpected response format");
-      }
-    } on DioException catch (e) {
-      print("Dio Error: ${e.message}");
-      throw Exception("Failed to load posts: ${e.response?.statusCode}");
+Future<List<JournalModels>> getAllJournal() async {
+  try {
+    final response = await DioHttpClient.getInstance().get(
+      API.journal,
+      queryParameters: {"action": "all"},
+    );
+
+    print("Full Response: ${response.data}");
+
+    // ✅ ambil list di dalam `data.data`
+    if (response.data['data'] != null && response.data['data']['data'] != null) {
+      final List<dynamic> journalList = response.data['data']['data'];
+      _journals = JournalModels.fromJsonList(journalList);
+
+      print("Parsed Journals: $_journals");
+      return _journals;
+    } else {
+      throw Exception("Unexpected response format: ${response.data}");
     }
+  } on DioException catch (e) {
+    print("Dio Error: ${e.message}");
+    throw Exception("Failed to load journals: ${e.response?.statusCode}");
   }
+}
+
 
   @override
   Future<JournalModels?> getJournalById(int id) async {

@@ -12,7 +12,7 @@ class SejenakContainer extends StatelessWidget {
               width: 1.0,
               color: Colors.grey[900]!,
             ),
-            color: SejenakColor.secondary,
+            color: SejenakColor.primary,
             borderRadius: BorderRadius.circular(10),
             boxShadow: [
               const BoxShadow(

@@ -16,7 +16,7 @@ class JournalModels {
   });
 
   factory JournalModels.fromJson(Map<String, dynamic> json) => JournalModels(
-        entriesId: json['entriesID'] as int?,
+        entriesId: json['id'] as int?, // ✅ fix key dari "entriesID" ke "id"
         content: json['content'] as String?,
         attachment: json['attachment'] as String?,
         title: json['title'] as String?,
@@ -25,13 +25,14 @@ class JournalModels {
       );
 
   Map<String, dynamic> toJson() => {
-        'entriesID': entriesId,
+        'id': entriesId, // ✅ konsisten dengan API
         'content': content,
         'attachment': attachment,
         'title': title,
         'created_at': createdAt,
         'updated_at': updatedAt,
       };
+
   static List<JournalModels> fromJsonList(List<dynamic> jsonList) {
     return jsonList.map((json) => JournalModels.fromJson(json)).toList();
   }
