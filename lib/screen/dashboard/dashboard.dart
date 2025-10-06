@@ -40,27 +40,27 @@ class Dashboard extends StatelessWidget {
               profile: mySession!.user!.profil,
             ),
           ),
-          
+
           // Streak & Daily Challenge Section
           SliverToBoxAdapter(
             child: _buildStreakSection(),
           ),
-          
+
           // Stats Section
           SliverToBoxAdapter(
             child: _buildStatsSection(),
           ),
-          
+
           // Quick Actions - Menu Utama
           SliverToBoxAdapter(
             child: _buildQuickActions(context),
           ),
-          
+
           // Daily Challenge
           SliverToBoxAdapter(
             child: _buildDailyChallenge(),
           ),
-          
+
           // Recent Posts Section
           SliverToBoxAdapter(
             child: Padding(
@@ -72,7 +72,7 @@ class Dashboard extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Recent Posts List
           _buildRecentPostsList(),
         ],
@@ -116,53 +116,58 @@ class Dashboard extends StatelessWidget {
                     color: SejenakColor.stroke,
                   ),
                   SizedBox(height: 4),
-                  Row(
-                    children: [
-                      SejenakText(
-                        text: "7",
-                        type: SejenakTextType.h4,
-                        fontWeight: FontWeight.bold,
-                        color: SejenakColor.secondary,
-                      ),
-                      SizedBox(width: 4),
-                      SejenakText(
-                        text: "hari berturut-turut",
-                        type: SejenakTextType.small,
-                        color: SejenakColor.stroke,
-                      ),
-                    ],
-                  ),
+                  (mySession?.journalStreak != null &&
+                          mySession!.journalStreak! > 0)
+                      ? Row(
+                          children: [
+                            SejenakText(
+                              text: "7",
+                              type: SejenakTextType.h4,
+                              fontWeight: FontWeight.bold,
+                              color: SejenakColor.secondary,
+                            ),
+                            SizedBox(width: 4),
+                            SejenakText(
+                              text: "hari berturut-turut",
+                              type: SejenakTextType.small,
+                              color: SejenakColor.stroke,
+                            ),
+                          ],
+                        )
+                      : Row(
+                          children: [
+                            SejenakText(
+                              text: "hikss... belum ada streak",
+                              type: SejenakTextType.small,
+                              color: SejenakColor.stroke,
+                            ),
+                          ],
+                        ),
                   SizedBox(height: 8),
                   SejenakText(
-                    text: "Lanjutkan untuk menjaga streak-mu!",
+                    text: "tulis journal untuk membuat streak!",
                     type: SejenakTextType.small,
                     color: SejenakColor.stroke,
                   ),
                 ],
               ),
             ),
-            
+
             // Fire Icon
             Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: SejenakColor.secondary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: SejenakColor.secondary),
-              ),
-              child: Center(
-                child: SvgPicture.asset(
-                  'assets/svg/fire.svg',
-                  width: 32,
-                  height: 32,
-                  colorFilter: ColorFilter.mode(
-                    SejenakColor.secondary,
-                    BlendMode.srcIn,
-                  ),
-                ),
-              ),
-            ),
+              width: 100,
+              height: 100,
+              child: (mySession?.journalStreak != null &&
+                      mySession!.journalStreak! > 0)
+                  ? Image.asset(
+                      'assets/icon/icon_streak.png',
+                      fit: BoxFit.contain,
+                    )
+                  : Image.asset(
+                      'assets/icon/icon_sad.png',
+                      fit: BoxFit.contain,
+                    ),
+            )
           ],
         ),
       ),
@@ -192,17 +197,17 @@ class Dashboard extends StatelessWidget {
           children: [
             _buildStatItem(
               icon: 'assets/svg/post_icon.svg',
-              value: "12",
+              value: (mySession?.totalPost ?? 0).toString(),
               label: "Post",
             ),
             _buildStatItem(
               icon: 'assets/svg/like.svg',
-              value: "45",
+              value: (mySession?.totalLike ?? 0).toString(),
               label: "Like Diterima",
             ),
             _buildStatItem(
-              icon: 'assets/svg/journal.svg',
-              value: "8",
+              icon: 'assets/svg/journal_icon.svg',
+              value: (mySession?.totalJournal ?? 0).toString(),
               label: "Journal",
             ),
           ],
@@ -280,71 +285,84 @@ class Dashboard extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+            GridView.count(
+              crossAxisCount: 4,
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
               children: [
                 _buildActionItem(
-                  icon: 'assets/svg/community.svg',
+                  icon: 'assets/svg/post_icon.svg',
                   label: 'Komunitas',
                   onTap: () {
-                    // Navigate to community page
+                     Navigator.pushReplacementNamed(
+                      context,
+                      '/comunity',
+                      result: (Route<dynamic> route) => false,
+                    );
                   },
                 ),
                 _buildActionItem(
                   icon: 'assets/svg/article.svg',
                   label: 'Artikel',
                   onTap: () {
-                    // Navigate to articles page
+
                   },
                 ),
                 _buildActionItem(
-                  icon: 'assets/svg/chat_bot.svg',
+                  icon: 'assets/svg/chat_icon.svg',
                   label: 'Chat Bot',
                   onTap: () {
-                    // Navigate to chat bot
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/chat',
+                      result: (Route<dynamic> route) => false,
+                    );
                   },
                 ),
                 _buildActionItem(
-                  icon: 'assets/svg/expert_chat.svg',
+                  icon: 'assets/svg/chat_icon.svg',
                   label: 'Chat Ahli',
                   onTap: () {
-                    // Navigate to expert chat
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/chat',
+                      result: (Route<dynamic> route) => false,
+                    );
                   },
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
                 _buildActionItem(
-                  icon: 'assets/svg/journal.svg',
+                  icon: 'assets/svg/journal_icon.svg',
                   label: 'Tulis Journal',
                   onTap: () {
-                    // Navigate to journal
+                    Navigator.pushReplacementNamed(
+                      context,
+                      '/journal',
+                      result: (Route<dynamic> route) => false,
+                    );
                   },
                 ),
                 _buildActionItem(
-                  icon: 'assets/svg/challenge.svg',
+                  icon: 'assets/svg/logo_mini.svg',
                   label: 'Challenge',
                   onTap: () {
-                    // Navigate to challenges
+                     Navigator.pushReplacementNamed(
+                      context,
+                      '/journal',
+                      result: (Route<dynamic> route) => false,
+                    );
                   },
                 ),
                 _buildActionItem(
-                  icon: 'assets/svg/profile.svg',
+                  icon: 'assets/svg/profil_default.svg',
                   label: 'Profil',
                   onTap: () {
-Navigator.push(
-  context,
-  MaterialPageRoute(builder: (context) => Profile()),
-);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => Profile()),
+                    );
                   },
-                ),
-                Container(
-                  width: 50,
-                  height: 50,
-                  // Empty container for alignment
                 ),
               ],
             ),
@@ -472,7 +490,8 @@ Navigator.push(
                   decoration: BoxDecoration(
                     color: SejenakColor.light,
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: SejenakColor.stroke.withOpacity(0.3)),
+                    border:
+                        Border.all(color: SejenakColor.stroke.withOpacity(0.3)),
                   ),
                   child: Center(
                     child: SvgPicture.asset(
@@ -539,7 +558,8 @@ Navigator.push(
           );
         }
 
-        List<PostModels> posts = snapshot.data!.take(3).toList(); // Limit to 3 posts
+        List<PostModels> posts =
+            snapshot.data!.take(3).toList(); // Limit to 3 posts
 
         return SliverList(
           delegate: SliverChildBuilderDelegate(
@@ -592,12 +612,14 @@ Navigator.push(
                                           width: 30,
                                           height: 30,
                                           fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
                                             return Container(
                                               width: 30,
                                               height: 30,
                                               color: SejenakColor.light,
-                                              child: Icon(Icons.person, size: 20),
+                                              child:
+                                                  Icon(Icons.person, size: 20),
                                             );
                                           },
                                         ),
@@ -615,7 +637,8 @@ Navigator.push(
                                     maxLines: 1,
                                   ),
                                   SejenakText(
-                                    text: post.createdAt?.substring(0, 10) ?? "",
+                                    text:
+                                        post.createdAt?.substring(0, 10) ?? "",
                                     type: SejenakTextType.small,
                                     maxLines: 1,
                                   ),
@@ -637,7 +660,8 @@ Navigator.push(
                         ),
                         SizedBox(height: 4),
                         SejenakText(
-                          text: post.deskripsiPost != null && post.deskripsiPost!.length > 100
+                          text: post.deskripsiPost != null &&
+                                  post.deskripsiPost!.length > 100
                               ? "${post.deskripsiPost!.substring(0, 100)}..."
                               : post.deskripsiPost ?? "Tidak ada konten",
                           type: SejenakTextType.small,

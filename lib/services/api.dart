@@ -5,9 +5,10 @@ import 'package:selena/session/user_session.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class API {
-  static const String endpoint = "https://sejenak.miomi.dev/api";
-  static const String endpointImage = "https://sejenak.miomi.dev/";
-  // static const String endpoint = "http://192.168.5.10:8000/api";
+  // static const String endpoint = "https://sejenak.miomi.dev/api";
+  // static const String endpointImage = "https://sejenak.miomi.dev/";
+  static const String endpoint = "http://192.168.5.10:8000/api";
+  static const String endpointImage = "http://192.168.5.10:8000/";
 
   // Authentication
   static const String login = "$endpoint/login";

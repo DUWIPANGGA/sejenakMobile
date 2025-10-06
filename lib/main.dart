@@ -38,25 +38,31 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       onGenerateRoute: (settings) {
-        WidgetBuilder? builder = SejenakRoute.routes[settings.name];
+  WidgetBuilder? builder = SejenakRoute.routes[settings.name];
 
-        if (builder != null) {
-          return PageRouteBuilder(
-            transitionDuration: Duration(milliseconds: 500),
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                builder(context),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
-          );
-        }
-        return null;
+  if (builder == null) return null;
+
+  // Contoh: kalau route-nya '/dashboard' pakai slide animation,
+  // kalau route lain pakai tanpa animasi (default)
+  if (settings.name == '/profile' || settings.name == '/profile') {
+    return PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => builder(context),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween<Offset>(begin: Offset(1, 0), end: Offset.zero)
+            .chain(CurveTween(curve: Curves.ease));
+        final offsetAnimation = animation.drive(tween);
+
+        return SlideTransition(position: offsetAnimation, child: child);
       },
-       home: LandingPage(),
+      transitionDuration: Duration(milliseconds: 400),
+    );
+  } else {
+    // tanpa animasi
+    return MaterialPageRoute(builder: builder, settings: settings);
+  }
+},
+
+      home: LandingPage(),
     );
   }
 }

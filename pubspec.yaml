@@ -34,6 +34,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/icon/icon.svg
     - assets/svg/like.svg
     - assets/svg/like_comment.svg
     - assets/svg/logo_mini.svg
@@ -59,9 +60,15 @@ flutter:
     - assets/svg/mail.svg
     - assets/svg/camera.svg
     - assets/icon/icon.png
+    - assets/icon/icon_streak.png
+    - assets/icon/icon_sad.png
     - assets/icon/profile.png
     - assets/splash/splash.png
     - assets/svg/dashboard.svg
+    - assets/svg/article.svg
+    - assets/svg/logout.svg
+    - assets/svg/challenge.svg
+    
   fonts:
     - family: Lexend
       fonts:

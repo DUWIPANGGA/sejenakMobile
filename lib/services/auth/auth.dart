@@ -56,7 +56,7 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
         ));
         DioHttpClient.getInstance().setToken(response.data["access_token"]);
 
-        Navigator.pushReplacementNamed(context, '/comunity');
+        Navigator.pushReplacementNamed(context, '/dashboard');
       }
     } catch (e) {
       if (e is DioException) {

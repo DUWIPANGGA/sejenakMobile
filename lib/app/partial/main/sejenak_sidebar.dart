@@ -4,10 +4,15 @@ import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/services/api.dart';
+import 'package:selena/session/user_session.dart';
 
 class SejenakSidebar extends StatelessWidget {
   final UserModels? user;
   const SejenakSidebar({super.key, required this.user});
+  Future<void> _logout(BuildContext context) async {
+    UserSession().clearUser();
+    Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +30,7 @@ class SejenakSidebar extends StatelessWidget {
           children: <Widget>[
             // Header dengan profil
             _buildProfileSection(context),
-            
+
             // Divider
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -34,12 +39,12 @@ class SejenakSidebar extends StatelessWidget {
                 thickness: 1,
               ),
             ),
-            
+
             // Menu Navigasi
             Expanded(
               child: _buildMenuItems(context),
             ),
-            
+
             // Footer dengan logout
             _buildFooterSection(context),
           ],
@@ -91,7 +96,7 @@ class SejenakSidebar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Nama user
           SejenakText(
             text: user?.user?.username ?? "User",
@@ -100,7 +105,7 @@ class SejenakSidebar extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          
+
           // Email user
           if (user?.user?.email != null)
             SejenakText(
@@ -109,9 +114,9 @@ class SejenakSidebar extends StatelessWidget {
               color: SejenakColor.stroke,
               textAlign: TextAlign.center,
             ),
-          
+
           const SizedBox(height: 16),
-          
+
           // Stats mini
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -123,9 +128,13 @@ class SejenakSidebar extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildMiniStat(count: "12", label: "Post"),
-                _buildMiniStat(count: "45", label: "Likes"),
-                _buildMiniStat(count: "7", label: "Streak"),
+                _buildMiniStat(
+                    count: (user?.totalPost ?? 0).toString(), label: "Post"),
+                _buildMiniStat(
+                    count: (user?.totalLike ?? 0).toString(), label: "Likes"),
+                _buildMiniStat(
+                    count: (user?.journalStreak ?? 0).toString(),
+                    label: "Streak"),
               ],
             ),
           ),
@@ -157,19 +166,25 @@ class SejenakSidebar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       children: [
         _buildMenuItem(
-          icon: 'assets/svg/home.svg',
+          icon: 'assets/svg/dashboard.svg',
           title: 'Dashboard',
-          onTap: () {
-            // Navigate to dashboard
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(context, '/dashboard');
           },
         ),
         _buildMenuItem(
-          icon: 'assets/svg/community.svg',
+          icon: 'assets/svg/post_icon.svg',
           title: 'Komunitas',
-          onTap: () {
-            // Navigate to community
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(
+              context,
+              '/comunity',
+              result: (Route<dynamic> route) => false,
+            );
           },
         ),
         _buildMenuItem(
@@ -181,35 +196,55 @@ class SejenakSidebar extends StatelessWidget {
           },
         ),
         _buildMenuItem(
-          icon: 'assets/svg/chat_bot.svg',
+          icon: 'assets/svg/chat_icon.svg',
           title: 'Chat Bot',
-          onTap: () {
-            // Navigate to chat bot
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(
+              context,
+              '/chat',
+              result: (Route<dynamic> route) => false,
+            );
           },
         ),
         _buildMenuItem(
-          icon: 'assets/svg/expert_chat.svg',
+          icon: 'assets/svg/chat_icon.svg',
           title: 'Chat dengan Ahli',
-          onTap: () {
-            // Navigate to expert chat
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(
+              context,
+              '/chat',
+              result: (Route<dynamic> route) => false,
+            );
           },
         ),
         _buildMenuItem(
-          icon: 'assets/svg/journal.svg',
+          icon: 'assets/svg/journal_icon.svg',
           title: 'Journal Saya',
-          onTap: () {
-            // Navigate to journal
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(
+              context,
+              '/journal',
+              result: (Route<dynamic> route) => false,
+            );
           },
         ),
         _buildMenuItem(
           icon: 'assets/svg/challenge.svg',
           title: 'Daily Challenge',
-          onTap: () {
-            // Navigate to challenges
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(
+              context,
+              '/dashboard',
+              result: (Route<dynamic> route) => false,
+            );
           },
         ),
         _buildMenuItem(
@@ -223,9 +258,14 @@ class SejenakSidebar extends StatelessWidget {
         _buildMenuItem(
           icon: 'assets/svg/settings.svg',
           title: 'Pengaturan',
-          onTap: () {
-            // Navigate to settings
+          onTap: () async {
             Navigator.pop(context);
+            await Future.delayed(Duration(milliseconds: 200));
+            Navigator.pushReplacementNamed(
+              context,
+              '/dashboard',
+              result: (Route<dynamic> route) => false,
+            );
           },
         ),
       ],
@@ -278,7 +318,7 @@ class SejenakSidebar extends StatelessWidget {
             thickness: 1,
           ),
           const SizedBox(height: 16),
-          
+
           // Logout button
           Container(
             width: double.infinity,
@@ -292,10 +332,28 @@ class SejenakSidebar extends StatelessWidget {
               color: Colors.transparent,
               child: InkWell(
                 borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  // Logout logic
-                  Navigator.pop(context);
-                  // Add logout confirmation dialog here
+                onTap: () async {
+                  final shouldLogout = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Konfirmasi Logout'),
+                      content: const Text('Apakah kamu yakin ingin keluar?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          child: const Text('Batal'),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          child: const Text('Keluar'),
+                        ),
+                      ],
+                    ),
+                  );
+
+                  if (shouldLogout ?? false) {
+                    await _logout(context);
+                  }
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -321,9 +379,9 @@ class SejenakSidebar extends StatelessWidget {
               ),
             ),
           ),
-          
+
           const SizedBox(height: 8),
-          
+
           // Version info
           SejenakText(
             text: 'Sejenak v1.0.0',
