@@ -5,10 +5,10 @@ import 'package:selena/session/user_session.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class API {
-  // static const String endpoint = "https://sejenak.miomi.dev/api";
-  // static const String endpointImage = "https://sejenak.miomi.dev/";
-  static const String endpoint = "http://192.168.5.10:8000/api";
-  static const String endpointImage = "http://192.168.5.10:8000/";
+  static const String endpoint = "https://sejenak.miomi.dev/api";
+  static const String endpointImage = "https://sejenak.miomi.dev/";
+  // static const String endpoint = "http://192.168.5.10:8000/api";
+  // static const String endpointImage = "http://192.168.5.10:8000/";
 
   // Authentication
   static const String login = "$endpoint/login";
@@ -43,12 +43,16 @@ class API {
   // Community (Note: ada typo di Postman - 'comunity' seharusnya 'community')
   static const String community = "$endpoint/comunity";
   static const String communityComments = "$community/comments";
-  static String communityCommentDetail(int id) => "$communityComments/$id";
+  static String communityCommentDetail(int id) => "$communityComments/post/$id";
   static const String communityReplies = "$community/replies";
   static const String communityLikes = "$community/likes";
   static String communityLikeDetail(int id) => "$communityLikes/$id";
   static const String communityLikeToggle = "$communityLikes/toggle";
   static const String allPost = "$community/getPost";
+  static const String communityCreatePost = "$community/posts"; 
+static String communityDetailPost(int id) => "$community/posts/$id";  
+static String communityUpdatePost(int id) => "$community/posts/$id"; 
+static String communityDeletePost(int id) => "$community/posts/$id";
 
   // Konselor
   static const String konselor = "$endpoint/konselor";
@@ -96,6 +100,7 @@ class DioHttpClient implements HttpClient {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
         print('Sending ${options.method} request to ${options.uri}');
+        
         if (options.data is FormData) {
           print('FormData with fields: ${options.data.fields}');
           if (options.data.files.isNotEmpty) {
@@ -139,7 +144,7 @@ class DioHttpClient implements HttpClient {
   void setToken(String token) {
     _authToken = token;
     _dio.options.headers["Authorization"] = "Bearer $token";
-    print('🔑 Authentication token set');
+    print('Authentication token set');
   }
 
   void clearToken() {
@@ -162,6 +167,7 @@ class DioHttpClient implements HttpClient {
 
   @override
   Future<Response> post(String url, {dynamic data}) async {
+    
     try {
       return await _dio.post(url, data: data, options: _getOptions());
     } on DioException catch (e) {

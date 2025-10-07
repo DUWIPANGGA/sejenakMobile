@@ -72,7 +72,7 @@ class SejenakDetailPost {
             return DraggableScrollableSheet(
               initialChildSize: 0.7,
               minChildSize: 0.3,
-              maxChildSize: 0.9,
+              maxChildSize: 1,
               builder: (_, controller) {
                 return Stack(
                   children: [
@@ -133,8 +133,8 @@ class SejenakDetailPost {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               SejenakText(
-                                                text: post.user!.username! ??
-                                                    'Anonymous',
+                                                text: post!.isAnonymous == true ? 
+                                                    'Anonymous':post.user!.username!,
                                                 type: SejenakTextType.regular,
                                                 maxLines: 1,
                                               ),
@@ -155,25 +155,22 @@ class SejenakDetailPost {
                                       ],
                                     ),
                                     const SizedBox(height: 16),
-                                    AspectRatio(
-                                      aspectRatio: 16 / 9,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image: NetworkImage(
-                                              post.postPicture==null?"":"${API.endpointImage}storage/${post.postPicture}",
-                                            ),
+                                    if (post.postPicture != null && post.postPicture!.isNotEmpty)
+                                      AspectRatio(
+                                        aspectRatio: 16 / 9,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: Image.network(
+                                            "${API.endpointImage}storage/${post.postPicture}",
                                             fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return const SizedBox.shrink();
+                                            },
                                           ),
-                                          border: Border.all(
-                                            color: SejenakColor.dark,
-                                            width: 2,
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(12),
                                         ),
                                       ),
-                                    ),
+
+
                                     const SizedBox(height: 16),
                                     SejenakText(
                                       text: post.deskripsiPost ??
@@ -211,7 +208,14 @@ class SejenakDetailPost {
                                         const SizedBox(width: 12),
                                       ],
                                     ),
-                                    const SizedBox(height: 24),
+                                  const SizedBox(height: 24),
+                                    Container(
+                                      width: double.infinity,
+                                      height: 2,
+                                      color: SejenakColor.primary,
+                                    ),
+                        const SizedBox(height: 24),
+
                                     FutureBuilder<List<PostCommentModels>>(
                                       future:
                                           ComunityAction(UserSession().user!)
@@ -225,7 +229,7 @@ class SejenakDetailPost {
                                           return Center(
                                             child: SejenakError(
                                               message:
-                                                  'Error loading comments: ${snapshot.error}',
+                                                  'belum ada komentar nih..',
                                             ),
                                           );
                                         } else if (!snapshot.hasData ||
@@ -241,14 +245,14 @@ class SejenakDetailPost {
                                                 .map(
                                                   (comment) =>
                                                       SejenakCommentContainer(
-                                                    id: comment.commentId!,
+                                                    id: comment.id!,
                                                     postImage: comment
                                                         .user!.profil
                                                         .toString(),
                                                     text: comment
-                                                            .contentComment ??
+                                                            .content ??
                                                         '',
-                                                    name: comment.username ??
+                                                    name: comment.user!.username ??
                                                         'Anonymous',
                                                     date: comment.createdAt ??
                                                         'Unknown date',
@@ -258,14 +262,14 @@ class SejenakDetailPost {
                                                     isMe: false,
                                                     onReplyChanged: (isReply) {
                                                       if (isReply &&
-                                                          comment.commentId !=
+                                                          comment.id !=
                                                               null) {
                                                         commentForReply =
                                                             comment;
                                                         reply = isReply;
                                                         commentInput.text = '';
                                                         String mentionText =
-                                                            " @${comment.username!} ";
+                                                            " @${comment.user!.username!} ";
                                                         if (!commentInput.text
                                                             .contains(
                                                                 mentionText)) {
@@ -276,7 +280,7 @@ class SejenakDetailPost {
                                                         }
 
                                                         print(
-                                                            "Replying to comment ID: ${comment.commentId}");
+                                                            "Replying to comment ID: ${comment.id}");
 
                                                         // Gunakan `Future.microtask` untuk memastikan keyboard fokus setelah UI update
                                                         Future.microtask(() {
@@ -295,16 +299,16 @@ class SejenakDetailPost {
                                                           .map((commentReply) =>
                                                               SejenakCommentContainer(
                                                                 id: commentReply
-                                                                    .commentReplyId!,
+                                                                    .id!,
                                                                 text: commentReply
-                                                                    .contentReply!,
+                                                                    .content!,
                                                                 postImage:
                                                                     commentReply
                                                                         .user!
                                                                         .profil
                                                                         .toString(),
                                                                 name: commentReply
-                                                                        .username ??
+                                                                        .user!.username ??
                                                                     'Anonymous',
                                                                 date: commentReply
                                                                         .createdAt ??
@@ -377,8 +381,8 @@ class SejenakDetailPost {
                                   } else {
                                     await ComunityAction(UserSession().user!)
                                         .replyCommentPost(
-                                            commentForReply.commentId!,
-                                            commentInput);
+                                            commentForReply.id!,
+                                            commentInput,post.postId!);
                                     if (commentInput.text.isNotEmpty) {
                                       commentInput.text = "";
                                       FocusScope.of(context).unfocus();

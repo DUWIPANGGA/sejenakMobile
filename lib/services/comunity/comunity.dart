@@ -17,7 +17,7 @@ abstract class IPostRepository {
 abstract class DetailAction {
   Future<void> likePost(bool isLike, int id);
   Future<void> commentPost(int id, TextEditingController commentController);
-  Future<void> replyCommentPost(int id, TextEditingController comment);
+  Future<void> replyCommentPost(int id, TextEditingController comment,int postId);
   Future<List<PostCommentModels>> getCommentPost(int id);
 }
 
@@ -27,59 +27,159 @@ class PostRepository {
 
 class ComunityServices implements IPostRepository {
   final PostRepository postRepository = PostRepository();
-  late List<PostModels> _posts;
   late UserModels user;
-  late DioHttpClient comunity;
-  ComunityServices(this.user) {
-    _posts = postRepository.posts;
+
+  List<PostModels>? _cachedPosts;
+  DateTime? _lastFetchTime;
+
+  ComunityServices(this.user);
+
+  bool get _isCacheValid {
+    if (_cachedPosts == null || _lastFetchTime == null) return false;
+    return DateTime.now().difference(_lastFetchTime!) < const Duration(minutes: 1);
   }
   @override
   Future<void> createPost(PostModels post) async {
-    _posts.add(post);
-    print("Post berhasil dibuat: ${post.deskripsiPost}");
-  }
+    try {
+      final formData = FormData.fromMap({
+        "title": post.title,
+        "content": post.deskripsiPost,
+        if (post.postPicture != null)
+          "image": await MultipartFile.fromFile(post.postPicture!),
+        "is_anonymous": (post.isAnonymous ?? false) ? "1" : "0",
+      });
 
+      final response = await DioHttpClient.getInstance().post(
+        API.communityCreatePost,
+        data: formData,
+      );
+
+      print("Response: ${response.data}");
+
+      if (response.data['status'] == "success") {
+        final newPost = PostModels.fromJson(response.data['data']);
+
+        // tambah ke cache juga
+        _cachedPosts ??= [];
+        _cachedPosts!.insert(0, newPost);
+        print("✅ Post berhasil dibuat dan ditambahkan ke cache");
+      } else {
+        throw Exception("Unexpected response: ${response.data}");
+      }
+    } on DioException catch (e) {
+      print("Dio Error (createPost): ${e.message}");
+      throw Exception("Gagal membuat post: ${e.response?.data}");
+    }
+  }
+  @override
+Future<void> updatePost(PostModels post) async {
+  try {
+    final isLocalImage = post.postPicture != null && !post.postPicture!.startsWith("posts/");
+
+    final formData = FormData.fromMap({
+      "title": post.title,
+      "content": post.deskripsiPost,
+      if (isLocalImage)
+        "image": await MultipartFile.fromFile(post.postPicture!),
+      if (!isLocalImage && post.postPicture != null)
+        "existing_image": post.postPicture, // kirim path lama biar backend tahu
+      "is_anonymous": post.isAnonymous ?? false,
+    });
+
+    final response = await DioHttpClient.getInstance().put(
+      API.communityUpdatePost(post.postId!),
+      data: formData,
+    );
+
+    print("Response: ${response.data}");
+
+    if (response.data['status'] == "success") {
+      int index = _cachedPosts!.indexWhere((p) => p.postId == post.postId);
+      if (index != -1) {
+        _cachedPosts![index] = PostModels.fromJson(response.data['data']);
+        print("✅ Post berhasil diperbarui: ${post.deskripsiPost}");
+      }
+    } else {
+      throw Exception("Unexpected response format: ${response.data}");
+    }
+  } on DioException catch (e) {
+    print("Dio Error (updatePost): ${e.message}");
+    throw Exception("Gagal update post: ${e.response?.statusCode}");
+  }
+}
+
+  
   @override
   Future<PostModels?> getPostById(int id) async {
-    return _posts.firstWhere((post) => post.postId == id);
+    try {
+      final response = await DioHttpClient.getInstance().get(
+        API.communityDetailPost(id),
+      );
+
+      print("Response: ${response.data}");
+
+      if (response.data['status'] == "success") {
+        return PostModels.fromJson(response.data['data']);
+      } else {
+        throw Exception("Unexpected response: ${response.data}");
+      }
+    } on DioException catch (e) {
+      print("Dio Error (getPostById): ${e.message}");
+      throw Exception("Gagal memuat post: ${e.response?.statusCode}");
+    }
   }
 
   @override
   Future<List<PostModels>> getAllPosts() async {
+    print("chache status = $_cachedPosts");
+    if (_isCacheValid) {
+      print("📦 Mengambil data dari cache...");
+      return _cachedPosts!;
+    }
+
     try {
+      print("🌐 Fetching data dari API...");
       final response = await DioHttpClient.getInstance().get(
         API.community,
-        queryParameters:{
+        queryParameters: {
           "username": user.user!.username,
         },
       );
-      print("Response: ${response.data}");  
+
+      print("Response: ${response.data}");
+
       if (response.data['posts'] is List) {
-        _posts = PostModels.fromJsonList(response.data['posts']);
-        print("Response: ${_posts}");
-        return _posts;
+        _cachedPosts = PostModels.fromJsonList(response.data['posts']);
+        _lastFetchTime = DateTime.now(); // update waktu ambil terakhir
+        print("✅ Data post disimpan ke cache ${_cachedPosts}" );
+        return _cachedPosts!;
       } else {
         throw Exception("Unexpected response format");
       }
     } on DioException catch (e) {
-      // print("Dio Error: ${e.message}");
+      print("❌ Dio Error (getAllPosts): ${e.message}");
       throw Exception("Failed to load posts: ${e.response?.statusCode}");
     }
   }
-
-  @override
-  Future<void> updatePost(PostModels post) async {
-    int index = _posts.indexWhere((p) => p.postId == post.postId);
-    if (index != -1) {
-      _posts[index] = post;
-      print("Post berhasil diperbarui: ${post.deskripsiPost}");
-    }
-  }
-
-  @override
+@override
   Future<void> deletePost(int id) async {
-    _posts.removeWhere((post) => post.postId == id);
-    print("Post dengan ID $id berhasil dihapus");
+    try {
+      final response = await DioHttpClient.getInstance().delete(
+        API.communityDeletePost(id),
+      );
+
+      print("Response: ${response.data}");
+
+      if (response.data['status'] == "success") {
+        _cachedPosts!.removeWhere((post) => post.postId == id);
+        print("🗑️ Post dengan ID $id berhasil dihapus");
+      } else {
+        throw Exception("Unexpected response format: ${response.data}");
+      }
+    } on DioException catch (e) {
+      print("Dio Error (deletePost): ${e.message}");
+      throw Exception("Gagal menghapus post: ${e.response?.statusCode}");
+    }
   }
 }
 
@@ -134,45 +234,50 @@ class ComunityAction implements DetailAction {
 }
 
   @override
-  Future<void> replyCommentPost(int id, TextEditingController comment) async {
-    try {
-      final response = await DioHttpClient.getInstance().post(
-        API.community,
-        data: {
-          "action": "reply",
-          "id": id,
-          "username": user.user?.username,
-          "value": comment.text
-        },
-      );
-      print("Response: ${response.data}");
-      if (response.data['code'] == 200) {
-        print(response.data['code']);
-      } else {
-        throw Exception("Unexpected response format");
-      }
-    } on DioException catch (e) {
-      print("Dio Error: ${e.message}");
-      throw Exception("Failed to load posts: ${e.response?.statusCode}");
-    }
-  }
+Future<void> replyCommentPost(int commentId, TextEditingController commentController, int postId) async {
+  try {
+    final response = await DioHttpClient.getInstance().post(
+      API.communityReplies, // pastikan ini mengarah ke "/comments"
+      data: {
+        "post_id": postId,
+        "comment_id": commentId, // id komentar yang dibalas
+        "content": commentController.text,
+      },
+    );
 
-  @override
-  Future<List<PostCommentModels>> getCommentPost(int id) async {
-    try {
-      final response = await DioHttpClient.getInstance().get(
-        API.communityCommentDetail(id),
-      );
-      print("Response: ${response.data['body']['comment']}");
-      if (response.data['code'] == 200) {
-        print(response.data['body']['comment']);
-        return PostCommentModels.fromJsonList(response.data['body']['comment']);
-      } else {
-        throw Exception("Unexpected response format");
-      }
-    } on DioException catch (e) {
-      print("Dio Error: ${e.message}");
-      throw Exception("Failed to load posts: ${e.response?.statusCode}");
+    print("Response: ${response.data}");
+
+    if (response.data['success'] == true) {
+      print("Reply berhasil dikirim: ${response.data['data']}");
+    } else {
+      throw Exception("Unexpected response format: ${response.data}");
     }
+  } on DioException catch (e) {
+    print("Dio Error: ${e.message}");
+    throw Exception("Failed to reply comment: ${e.response?.statusCode}");
   }
 }
+
+
+@override
+Future<List<PostCommentModels>> getCommentPost(int postId) async {
+  try {
+    final response = await DioHttpClient.getInstance().get(
+      API.communityCommentDetail(postId), 
+    );
+
+    print("Response: ${response.data}");
+
+    if (response.data['success'] == true) {
+      final List<dynamic> commentList = response.data['data'];
+      return PostCommentModels.fromJsonList(commentList);
+    } else {
+      throw Exception("Unexpected response format: ${response.data}");
+    }
+  } on DioException catch (e) {
+    print("Dio Error: ${e.message}");
+    throw Exception("Failed to load comments: ${e.response?.statusCode}");
+  }
+}
+}
+

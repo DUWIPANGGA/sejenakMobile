@@ -390,11 +390,13 @@ class Comunity extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       child: SejenakPostContainer(
+        postId: post.postId!,
         title: post.title ?? "Judul Kosong",
         profile: post.user?.profil == null ? "" : "${API.endpointImage}storage/${post.user?.profil}",
         postImage: post.postPicture == null ? "" : "${API.endpointImage}storage/${post.postPicture}",
         text: post.deskripsiPost ?? "Tidak ada konten",
         likes: post.totalLike ?? 0,
+        isMe: post.user?.id == mySession?.user?.id,
         isAnonymous: post.isAnonymous ?? false,
         comment: post.totalComment ?? 0,
         name: post.user?.username ?? "anonymous",
