@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:selena/app/components/sejenak_floating_button.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/app/partial/comunity/sejenak_create_post.dart';
+import 'package:selena/app/partial/comunity/sejenak_detail_post.dart';
+import 'package:selena/app/partial/comunity/sejenak_post_container.dart';
 import 'package:selena/app/partial/main/sejenak_circular.dart';
 import 'package:selena/app/partial/main/sejenak_error.dart';
 import 'package:selena/app/partial/main/sejenak_header_page.dart';
@@ -20,11 +22,13 @@ class Dashboard extends StatelessWidget {
   final UserModels? mySession;
   final ComunityServices comunity;
   final Future<List<PostModels>> recentPosts;
+  final ComunityAction comunityAction;
 
   Dashboard({super.key})
       : mySession = UserSession().user,
         comunity = ComunityServices(UserSession().user!),
-        recentPosts = ComunityServices(UserSession().user!).getAllPosts() {
+        comunityAction = ComunityAction(UserSession().user!),
+        recentPosts = ComunityServices(UserSession().user!).getAllMyPosts() {
     assert(mySession != null, "User tidak boleh null!");
   }
 
@@ -66,7 +70,7 @@ class Dashboard extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: SejenakText(
-                text: "Post Terbaru Komunitas",
+                text: "Post Anda di Komunitas",
                 type: SejenakTextType.h5,
                 fontWeight: FontWeight.bold,
               ),
@@ -121,7 +125,7 @@ class Dashboard extends StatelessWidget {
                       ? Row(
                           children: [
                             SejenakText(
-                              text: "7",
+                              text: (mySession!.journalStreak!).toString(),
                               type: SejenakTextType.h4,
                               fontWeight: FontWeight.bold,
                               color: SejenakColor.secondary,
@@ -296,7 +300,7 @@ class Dashboard extends StatelessWidget {
                   icon: 'assets/svg/post_icon.svg',
                   label: 'Komunitas',
                   onTap: () {
-                     Navigator.pushReplacementNamed(
+                    Navigator.pushReplacementNamed(
                       context,
                       '/comunity',
                       result: (Route<dynamic> route) => false,
@@ -306,9 +310,7 @@ class Dashboard extends StatelessWidget {
                 _buildActionItem(
                   icon: 'assets/svg/article.svg',
                   label: 'Artikel',
-                  onTap: () {
-
-                  },
+                  onTap: () {},
                 ),
                 _buildActionItem(
                   icon: 'assets/svg/chat_icon.svg',
@@ -347,7 +349,7 @@ class Dashboard extends StatelessWidget {
                   icon: 'assets/svg/logo_mini.svg',
                   label: 'Challenge',
                   onTap: () {
-                     Navigator.pushReplacementNamed(
+                    Navigator.pushReplacementNamed(
                       context,
                       '/journal',
                       result: (Route<dynamic> route) => false,
@@ -548,7 +550,7 @@ class Dashboard extends StatelessWidget {
                 padding: const EdgeInsets.all(20.0),
                 child: Center(
                   child: SejenakText(
-                    text: "Belum ada post terbaru",
+                    text: "Anda belum membuat postingan",
                     type: SejenakTextType.regular,
                     color: SejenakColor.stroke,
                   ),
@@ -558,175 +560,46 @@ class Dashboard extends StatelessWidget {
           );
         }
 
-        List<PostModels> posts =
-            snapshot.data!.take(3).toList(); // Limit to 3 posts
+        List<PostModels> posts = snapshot.data!.toList();
 
         return SliverList(
           delegate: SliverChildBuilderDelegate(
             (context, index) {
               var post = posts[index];
-              return Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: SejenakColor.primary,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(width: 1.0, color: Colors.grey[900]!),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: SejenakColor.black,
-                        spreadRadius: 0.4,
-                        blurRadius: 0,
-                        offset: Offset(0.3, 4),
-                      ),
-                    ],
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            ClipOval(
-                              child: post.isAnonymous ?? false
-                                  ? Container(
-                                      width: 30,
-                                      height: 30,
-                                      color: SejenakColor.light,
-                                      child: Icon(
-                                        Icons.no_accounts,
-                                        size: 20,
-                                        color: SejenakColor.stroke,
-                                      ),
-                                    )
-                                  : post.user?.profil == null
-                                      ? Container(
-                                          width: 30,
-                                          height: 30,
-                                          color: SejenakColor.light,
-                                          child: Icon(Icons.person, size: 20),
-                                        )
-                                      : Image.network(
-                                          "${API.endpointImage}storage/${post.user?.profil}",
-                                          width: 30,
-                                          height: 30,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Container(
-                                              width: 30,
-                                              height: 30,
-                                              color: SejenakColor.light,
-                                              child:
-                                                  Icon(Icons.person, size: 20),
-                                            );
-                                          },
-                                        ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SejenakText(
-                                    text: post.isAnonymous ?? false
-                                        ? 'Anonymous'
-                                        : post.user?.username ?? "anonymous",
-                                    type: SejenakTextType.regular,
-                                    maxLines: 1,
-                                  ),
-                                  SejenakText(
-                                    text:
-                                        post.createdAt?.substring(0, 10) ?? "",
-                                    type: SejenakTextType.small,
-                                    maxLines: 1,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SvgPicture.asset(
-                              'assets/svg/humberger_menu.svg',
-                              width: 20,
-                              height: 20,
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 8),
-                        SejenakText(
-                          text: post.title ?? "Judul Kosong",
-                          type: SejenakTextType.h5,
-                          textAlign: TextAlign.left,
-                        ),
-                        SizedBox(height: 4),
-                        SejenakText(
-                          text: post.deskripsiPost != null &&
-                                  post.deskripsiPost!.length > 100
-                              ? "${post.deskripsiPost!.substring(0, 100)}..."
-                              : post.deskripsiPost ?? "Tidak ada konten",
-                          type: SejenakTextType.small,
-                          textAlign: TextAlign.left,
-                        ),
-                        SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Row(
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/svg/like.svg',
-                                  width: 18,
-                                  height: 18,
-                                  colorFilter: ColorFilter.mode(
-                                    SejenakColor.stroke,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  (post.totalLike ?? 0).toString(),
-                                  style: TextStyle(
-                                    fontFamily: "Exo2",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(width: 12),
-                            Row(
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/svg/comment.svg',
-                                  width: 18,
-                                  height: 18,
-                                  colorFilter: ColorFilter.mode(
-                                    SejenakColor.stroke,
-                                    BlendMode.srcIn,
-                                  ),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  (post.totalComment ?? 0).toString(),
-                                  style: TextStyle(
-                                    fontFamily: "Exo2",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
+              return _buildPostItem(post, context);
             },
             childCount: posts.length,
           ),
         );
       },
+    );
+  }
+
+  Widget _buildPostItem(PostModels post, BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      child: SejenakPostContainer(
+        postId: post.postId!,
+        title: post.title ?? "Judul Kosong",
+        profile: post.user?.profil == null
+            ? ""
+            : "${API.endpointImage}storage/${post.user?.profil}",
+        postImage: post.postPicture == null
+            ? ""
+            : "${API.endpointImage}storage/${post.postPicture}",
+        text: post.deskripsiPost ?? "Tidak ada konten",
+        likes: post.totalLike ?? 0,
+        isMe: post.user?.id == mySession?.user?.id,
+        isAnonymous: post.isAnonymous ?? false,
+        comment: post.totalComment ?? 0,
+        name: post.user?.username ?? "anonymous",
+        isLike: post.isLikedByMe(mySession?.user?.id),
+        date: post.createdAt!.substring(0, 10),
+        commentAction: () => SejenakDetailPost(post: post).showDetail(context),
+        likeAction: (bool isLiked, int postID) async {
+          comunityAction.likePost(isLiked, post.postId!);
+        },
+      ),
     );
   }
 }

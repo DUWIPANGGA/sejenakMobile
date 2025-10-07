@@ -7,8 +7,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 class API {
   static const String endpoint = "https://sejenak.miomi.dev/api";
   static const String endpointImage = "https://sejenak.miomi.dev/";
-  // static const String endpoint = "http://192.168.5.10:8000/api";
-  // static const String endpointImage = "http://192.168.5.10:8000/";
+
 
   // Authentication
   static const String login = "$endpoint/login";
@@ -50,6 +49,7 @@ class API {
   static const String communityLikeToggle = "$communityLikes/toggle";
   static const String allPost = "$community/getPost";
   static const String communityCreatePost = "$community/posts"; 
+   static const String myPosts = "$community/posts/my-posts";
 static String communityDetailPost(int id) => "$community/posts/$id";  
 static String communityUpdatePost(int id) => "$community/posts/$id"; 
 static String communityDeletePost(int id) => "$community/posts/$id";
@@ -76,6 +76,7 @@ abstract class HttpClient {
   Future<Response> put(String url, {dynamic data});
   Future<Response> delete(String url, {dynamic data});
   Future<Response> postFormData(String url, FormData formData);
+  Future<Response> patch(String url, {dynamic data});
 }
 
 class DioHttpClient implements HttpClient {
@@ -152,7 +153,15 @@ class DioHttpClient implements HttpClient {
     _dio.options.headers.remove("Authorization");
     print('🔒 Authentication token cleared');
   }
-
+ @override
+  Future<Response> patch(String url, {dynamic data}) async {
+    try {
+      return await _dio.patch(url, data: data, options: _getOptions());
+    } on DioException catch (e) {
+      _logDetailedError(e, url, 'PATCH');
+      rethrow;
+    }
+  }
   @override
   Future<Response> get(String url,
       {Map<String, dynamic>? queryParameters}) async {

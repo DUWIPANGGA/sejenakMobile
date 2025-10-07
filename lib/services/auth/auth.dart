@@ -49,6 +49,12 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
           expiresIn: response.data["expires_in"] ?? "",
           refreshExpiresIn: response.data["refresh_expires_in"] ?? "",
           token: response.data["access_token"] ?? "",
+          totalPost: response.data["total_post"] ?? "",
+          totalJournal: response.data["total_journal"] ?? "",
+          totalLike: response.data["total_like"] ?? "",
+          journalThisMonth: response.data["journal_this_month"] ?? "",
+          journalStreak: response.data["journal_streak"] ?? "",
+          postStreak: response.data["post_streak"] ?? "",
           user: response.data["user"] is Map<String, dynamic>
               ? models.User.fromJson(
                   response.data["user"] as Map<String, dynamic>)

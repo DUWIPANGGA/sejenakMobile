@@ -3,7 +3,7 @@ import 'package:selena/app/components/sejenak_calendar.dart';
 import 'package:selena/app/components/sejenak_floating_button.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/app/partial/chat/sejenak_main_chat.dart';
-import 'package:selena/app/partial/journal/sejenak_create_journal.dart';
+import 'package:selena/app/partial/journal/sejenak_journal.dart';
 import 'package:selena/app/partial/journal/sejenak_journal_list.dart';
 import 'package:selena/app/partial/main/sejenak_circular.dart';
 import 'package:selena/app/partial/main/sejenak_error.dart';
@@ -16,19 +16,34 @@ import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/services/journal/journal.dart';
 import 'package:selena/session/user_session.dart';
 
-class Journal extends StatelessWidget {
-  final UserModels? user;
-  final JournalApiService comunity;
-  final Future<List<JournalModels>> result;
+class Journal extends StatefulWidget {
+  @override
+  _JournalState createState() => _JournalState();
+}
 
-  Journal({super.key})
-      : user = UserSession().user,
-        comunity = JournalApiService(),
-        result = JournalApiService().getAllJournal() {
-    assert(user != null, "User tidak boleh null!");
-    print(result);
+class _JournalState extends State<Journal> {
+  final UserModels? user = UserSession().user;
+  final JournalApiService journalService = JournalApiService();
+  late Future<List<JournalModels>> result;
+  List<JournalModels> _journals = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadJournals();
   }
 
+  void _loadJournals() {
+    setState(() {
+      result = journalService.getAllJournal();
+    });
+  }
+
+  void _deleteJournalFromList(int journalId) {
+    setState(() {
+      _journals.removeWhere((journal) => journal.entriesId == journalId);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +54,7 @@ class Journal extends StatelessWidget {
           print("Connection: ${snapshot.connectionState}");
           print("Has Data: ${snapshot.hasData}");
           print("Data: ${snapshot.data}");
-          
+
           if (snapshot.connectionState == ConnectionState.waiting) {
             return _buildLoadingState();
           } else if (snapshot.hasError) {
@@ -53,7 +68,8 @@ class Journal extends StatelessWidget {
         },
       ),
       floatingActionButton: SejenakFloatingButton(
-        onPressed: () => SejenakCreateJournal().showCreateContainer(context),
+        onPressed: () => SejenakJournal(  onJournalSaved: _loadJournals,
+).showEditMode(context),
       ),
       endDrawer: SejenakSidebar(user: user),
       bottomNavigationBar: SejenakNavbar(index: 3),
@@ -96,7 +112,7 @@ class Journal extends StatelessWidget {
           text: "Journal",
           profile: user!.user!.profil,
         ),
-        
+
         // Calendar Section dengan container
         Container(
           margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -115,8 +131,7 @@ class Journal extends StatelessWidget {
           ),
           child: SejenakCalendar(),
         ),
-        
-        // Empty State Message dengan container
+
         Expanded(
           child: Center(
             child: Container(
@@ -152,7 +167,8 @@ class Journal extends StatelessWidget {
                   ),
                   SizedBox(height: 8),
                   SejenakText(
-                    text: "Mulai tulis journal pertamamu untuk merefleksikan hari-harimu",
+                    text:
+                        "Mulai tulis journal pertamamu untuk merefleksikan hari-harimu",
                     type: SejenakTextType.small,
                     color: SejenakColor.stroke,
                     textAlign: TextAlign.center,
@@ -168,7 +184,7 @@ class Journal extends StatelessWidget {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () => SejenakCreateJournal().showCreateContainer(context),
+                        onTap: () => SejenakJournal(),
                         child: Center(
                           child: SejenakText(
                             text: "Tulis Journal Pertama",
@@ -199,7 +215,7 @@ class Journal extends StatelessWidget {
             profile: user!.user!.profil,
           ),
         ),
-        
+
         // Calendar Section
         // SliverToBoxAdapter(
         //   child: Container(
@@ -220,12 +236,12 @@ class Journal extends StatelessWidget {
         //     child: SejenakCalendar(),
         //   ),
         // ),
-        
+
         // Journal Stats
         SliverToBoxAdapter(
           child: _buildJournalStats(journals),
         ),
-        
+
         // Journal List Header
         SliverToBoxAdapter(
           child: Padding(
@@ -247,7 +263,7 @@ class Journal extends StatelessWidget {
             ),
           ),
         ),
-        
+
         // Journal List
         SliverList(
           delegate: SliverChildBuilderDelegate(
@@ -256,27 +272,73 @@ class Journal extends StatelessWidget {
               return Padding(
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: Container(
-                  decoration: BoxDecoration(
-                    color: SejenakColor.primary,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(width: 1.0, color: Colors.grey[900]!),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: SejenakColor.black,
-                        spreadRadius: 0.4,
-                        blurRadius: 0,
-                        offset: Offset(0.3, 4),
-                      ),
-                    ],
-                  ),
+                  // decoration: BoxDecoration(
+                  //   color: SejenakColor.primary,
+                  //   borderRadius: BorderRadius.circular(20),
+                  //   border: Border.all(width: 1.0, color: Colors.grey[900]!),
+                  //   // boxShadow: const [
+                  //   //   BoxShadow(
+                  //   //     color: SejenakColor.black,
+                  //   //     spreadRadius: 0.4,
+                  //   //     blurRadius: 0,
+                  //   //     offset: Offset(0.3, 4),
+                  //   //   ),
+                  //   // ],
+                  // ),
                   child: SejenakJournalList(
                     title: journal.title ?? 'Tanpa Judul',
                     text: journal.content ?? 'Tanpa Konten',
                     // date: journal.createdAt?.substring(0, 10) ?? '',
                     // mood: _getMoodFromJournal(journal),
                     action: () async {
-                      SejenakMainChat(id: journal.entriesId ?? 0)
-                          .showChat(context);
+                      SejenakJournal(
+                        id: journal.entriesId,
+                        initialTitle: journal.title,
+                        initialContent: journal.content,
+                      ).showJournalView(context);
+                      // SejenakMainChat(id: journal.entriesId ?? 0)
+                      //     .showChat(context);
+                    },
+                    onEdit: () async {
+                      SejenakJournal(
+                        id: journal.entriesId,
+                        initialTitle: journal.title,
+                        initialContent: journal.content,
+                      ).showEditMode(context);
+                    },
+                    onDelete: () async {
+                      bool confirm = await showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: Text("Delete Journal"),
+                          content: Text(
+                              "Are you sure you want to delete this journal?"),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: Text("Cancel"),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: Text("Delete",
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirm == true) {
+                        await journalService.deleteJournal(journal.entriesId!);
+                        _deleteJournalFromList(journal.entriesId!);
+                        print("Journal deleted");
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Journal berhasil dihapus"),
+                            backgroundColor: Colors.green,
+                          ),
+                        );
+
+                      }
                     },
                   ),
                 ),
@@ -330,7 +392,7 @@ class Journal extends StatelessWidget {
               icon: Icons.calendar_today_rounded,
             ),
             _buildStatItem(
-              value: "7",
+              value: (user!.journalStreak!).toString(),
               label: "Streak",
               icon: Icons.local_fire_department_rounded,
             ),

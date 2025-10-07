@@ -11,84 +11,125 @@ abstract class JournalService {
 }
 
 class JournalApiService implements JournalService {
-  final Dio _dio = Dio();
-  final String _baseUrl = "http://192.168.1.21:8000/api/journal";
+  final DioHttpClient _httpClient = DioHttpClient.getInstance();
   late List<JournalModels> _journals;
 
   @override
-Future<List<JournalModels>> getAllJournal() async {
-  try {
-    final response = await DioHttpClient.getInstance().get(
-      API.journal,
-      queryParameters: {"action": "all"},
-    );
+  Future<List<JournalModels>> getAllJournal() async {
+    try {
+      final response = await _httpClient.get(
+        API.journal,
+        queryParameters: {"action": "all"},
+      );
 
-    print("Full Response: ${response.data}");
+      print("Full Response: ${response.data}");
 
-    // ✅ ambil list di dalam `data.data`
-    if (response.data['data'] != null && response.data['data']['data'] != null) {
-      final List<dynamic> journalList = response.data['data']['data'];
-      _journals = JournalModels.fromJsonList(journalList);
+      // ✅ ambil list di dalam `data.data`
+      if (response.data['data'] != null && response.data['data']['data'] != null) {
+        final List<dynamic> journalList = response.data['data']['data'];
+        _journals = JournalModels.fromJsonList(journalList);
 
-      print("Parsed Journals: $_journals");
-      return _journals;
-    } else {
-      throw Exception("Unexpected response format: ${response.data}");
+        print("Parsed Journals: $_journals");
+        return _journals;
+      } else {
+        throw Exception("Unexpected response format: ${response.data}");
+      }
+    } on DioException catch (e) {
+      print("Dio Error: ${e.message}");
+      throw Exception("Failed to load journals: ${e.response?.statusCode}");
     }
-  } on DioException catch (e) {
-    print("Dio Error: ${e.message}");
-    throw Exception("Failed to load journals: ${e.response?.statusCode}");
   }
-}
-
 
   @override
   Future<JournalModels?> getJournalById(int id) async {
-    final response = await _dio.get("$_baseUrl/$id");
-    return JournalModels.fromJson(response.data);
+    try {
+      final response = await _httpClient.get(API.journalDetail(id));
+      
+      if (response.data['data'] != null) {
+        return JournalModels.fromJson(response.data['data']);
+      } else {
+        throw Exception("Journal not found or invalid response format");
+      }
+    } on DioException catch (e) {
+      print("Dio Error getting journal by ID: ${e.message}");
+      throw Exception("Failed to load journal: ${e.response?.statusCode}");
+    }
   }
 
   @override
   Future<void> createJournal(JournalModels journal) async {
-    await _dio.post(_baseUrl, data: journal.toJson());
+    try {
+      await _httpClient.post(
+        API.journal,
+        data: journal.toJson(),
+      );
+    } on DioException catch (e) {
+      print("Dio Error creating journal: ${e.message}");
+      throw Exception("Failed to create journal: ${e.response?.statusCode}");
+    }
   }
 
   @override
   Future<void> updateJournal(JournalModels journal) async {
-    await _dio.put("$_baseUrl/${journal.entriesId}", data: journal.toJson());
+    try {
+      await _httpClient.patch(
+        API.journalDetail(journal.entriesId!),
+        data: journal.toJson(),
+      );
+    } on DioException catch (e) {
+      print("Dio Error updating journal: ${e.message}");
+      throw Exception("Failed to update journal: ${e.response?.statusCode}");
+    }
   }
 
   @override
   Future<void> deleteJournal(int id) async {
-    await _dio.delete("$_baseUrl/$id");
+    try {
+      await _httpClient.delete(API.journalDetail(id));
+    } on DioException catch (e) {
+      print("Dio Error deleting journal: ${e.message}");
+      throw Exception("Failed to delete journal: ${e.response?.statusCode}");
+    }
   }
 }
 
 class JournalLocalService implements JournalService {
+  final List<JournalModels> _localJournals = [];
+
   @override
   Future<List<JournalModels>> getAllJournal() async {
     print("Fetching all journals locally");
-    return [];
+    return List.from(_localJournals);
   }
 
   @override
   Future<JournalModels?> getJournalById(int id) async {
     print("Fetching journal locally with ID: $id");
-    return null;
+    try {
+      return _localJournals.firstWhere((journal) => journal.entriesId == id);
+    } catch (e) {
+      return null;
+    }
   }
 
   @override
   Future<void> createJournal(JournalModels journal) async {
     print("Creating journal locally: ${journal.title}");
+    _localJournals.add(journal);
   }
 
   @override
   Future<void> updateJournal(JournalModels journal) async {
     print("Updating journal locally with ID: ${journal.entriesId}");
+    final index = _localJournals.indexWhere((j) => j.entriesId == journal.entriesId);
+    if (index != -1) {
+      _localJournals[index] = journal;
+    }
   }
 
   @override
   Future<void> deleteJournal(int id) async {
     print("Deleting journal locally with ID: $id");
+    _localJournals.removeWhere((journal) => journal.entriesId == id);
   }
 }
