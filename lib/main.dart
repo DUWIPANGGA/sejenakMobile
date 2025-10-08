@@ -42,8 +42,6 @@ class MainApp extends StatelessWidget {
 
   if (builder == null) return null;
 
-  // Contoh: kalau route-nya '/dashboard' pakai slide animation,
-  // kalau route lain pakai tanpa animasi (default)
   if (settings.name == '/profile' || settings.name == '/profile') {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => builder(context),

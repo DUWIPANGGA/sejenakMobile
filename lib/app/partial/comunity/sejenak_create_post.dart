@@ -142,6 +142,20 @@ class SejenakCreatePost {
                                 ),
                               ),
                               SizedBox(width: 10),
+                              // Tombol Post/Update di header
+                              Container(
+                                child: SejenakPrimaryButton(
+                                  width: 100,
+                                  height: 40,
+                                  text: id != null ? "Update" : "Post",
+                                  action: () => _createOrUpdatePost(
+                                    context,
+                                    commentInput.text,
+                                    _quillController,
+                                  ),
+                                  icon: 'assets/svg/play.svg',
+                                ),
+                              ),
                             ],
                           ),
                           SizedBox(height: 20),
@@ -336,20 +350,6 @@ class SejenakCreatePost {
                                       }
                                     },
                                     icon: "assets/svg/camera.svg",
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                Container(
-                                  child: SejenakPrimaryButton(
-                                    width: 100,
-                                    height: 50,
-                                    text: id != null ? "Post" : "Post", // Ubah text berdasarkan mode
-                                    action: () => _createOrUpdatePost(
-                                      context,
-                                      commentInput.text,
-                                      _quillController,
-                                    ),
-                                    icon: 'assets/svg/play.svg',
                                   ),
                                 ),
                               ],
