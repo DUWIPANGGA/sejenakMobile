@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:selena/app/components/sejenak_container.dart';
 import 'package:selena/app/components/sejenak_text.dart';
+import 'package:selena/app/partial/main/sejenak_circular.dart';
 import 'package:selena/app/partial/main/sejenak_header_page.dart';
 import 'package:selena/app/partial/main/sejenak_sidebar.dart';
 import 'package:selena/app/partial/sejenak_navbar.dart';
@@ -22,74 +23,70 @@ class Meditation extends StatefulWidget {
 
 class _MeditationState extends State<Meditation> {
   MeditationModels? dailyMeditation;
+  late Future<List<dynamic>> _initializationFuture;
   late MeditationService service;
-  bool isLoading = true;
-  String? errorMessage;
 
   @override
   void initState() {
     super.initState();
-    _initService();
+    _initializationFuture = _initializeData();
   }
 
-  Future<void> _initService() async {
+  Future<List<dynamic>> _initializeData() async {
     try {
+      // Initialize service
       service = await MeditationService.create();
-      await _fetchDailyMeditation();
+      
+      // Fetch daily meditation
+      final meditation = await service.getDailyMeditation();
+      
+      return [service, meditation];
     } catch (e) {
-      print('❌ Error initializing service: $e');
-      setState(() {
-        errorMessage = "Gagal menginisialisasi layanan audio";
-        isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _fetchDailyMeditation() async {
-    try {
-      final result = await service.getDailyMeditation();
-      setState(() {
-        dailyMeditation = result;
-        isLoading = false;
-      });
-    } catch (e) {
-      print('❌ Error fetching daily meditation: $e');
-      setState(() {
-        errorMessage = "Gagal memuat meditasi harian";
-        isLoading = false;
-      });
+      print('❌ Error initializing: $e');
+      rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return _buildLoadingScreen();
-    }
+    return Scaffold(
+      body: FutureBuilder<List<dynamic>>(
+        future: _initializationFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildLoadingState();
+          } else if (snapshot.hasError) {
+            return _buildErrorState(snapshot.error.toString());
+          } else if (!snapshot.hasData || snapshot.data!.length < 2) {
+            return _buildEmptyState(context);
+          }
 
-    if (errorMessage != null) {
-      return _buildErrorScreen();
-    }
-
-    return _buildMainScreen();
+          // Extract data from snapshot
+          service = snapshot.data![0] as MeditationService;
+          dailyMeditation = snapshot.data![1] as MeditationModels?;
+          
+          return _buildMainContent(context);
+        },
+      ),
+      endDrawer: SejenakSidebar(user: widget.user),
+      bottomNavigationBar: SejenakNavbar(index: 2),
+    );
   }
 
-  Widget _buildLoadingScreen() {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Menyiapkan meditasi...'),
-          ],
-        ),
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SejenakCircular(),
+          SizedBox(height: 16),
+          Text('Menyiapkan meditasi...'),
+        ],
       ),
     );
   }
 
-  Widget _buildErrorScreen() {
+  Widget _buildErrorState(String error) {
     return Scaffold(
       body: Center(
         child: Padding(
@@ -105,13 +102,17 @@ class _MeditationState extends State<Meditation> {
               ),
               SizedBox(height: 8),
               Text(
-                errorMessage!,
+                error,
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey),
               ),
               SizedBox(height: 16),
               ElevatedButton(
-                onPressed: _initService,
+                onPressed: () {
+                  setState(() {
+                    _initializationFuture = _initializeData();
+                  });
+                },
                 child: Text('Coba Lagi'),
               ),
             ],
@@ -121,8 +122,7 @@ class _MeditationState extends State<Meditation> {
     );
   }
 
-  Widget _buildMainScreen() {
-    final user = widget.user;
+  Widget _buildEmptyState(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         physics: const BouncingScrollPhysics(),
@@ -130,7 +130,7 @@ class _MeditationState extends State<Meditation> {
           SliverToBoxAdapter(
             child: SejenakHeaderPage(
               text: "Meditasi",
-              profile: user?.user?.profil,
+              profile: widget.user?.user?.profil,
             ),
           ),
           SliverToBoxAdapter(
@@ -140,15 +140,42 @@ class _MeditationState extends State<Meditation> {
             child: _buildActionButtons(),
           ),
           SliverToBoxAdapter(
-            child: _buildDailyMeditation(),
-          ),
-          SliverToBoxAdapter(
-            child: _buildMeditationSummary(),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: SejenakText(
+                text: "Belum ada meditasi harian untuk hari ini.",
+                type: SejenakTextType.small,
+              ),
+            ),
           ),
         ],
       ),
-      endDrawer: SejenakSidebar(user: user),
-      bottomNavigationBar: SejenakNavbar(index: 2),
+    );
+  }
+
+  Widget _buildMainContent(BuildContext context) {
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: SejenakHeaderPage(
+            text: "Meditasi",
+            profile: widget.user?.user?.profil,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: _buildWelcomeSection(),
+        ),
+        SliverToBoxAdapter(
+          child: _buildActionButtons(),
+        ),
+        SliverToBoxAdapter(
+          child: _buildDailyMeditation(),
+        ),
+        SliverToBoxAdapter(
+          child: _buildMeditationSummary(),
+        ),
+      ],
     );
   }
 
@@ -341,20 +368,25 @@ class _MeditationState extends State<Meditation> {
                             type: SejenakTextType.small,
                             color: SejenakColor.stroke,
                           ),
-                          // Progress indicator untuk loading
                           if (isLoading) ...[
                             const SizedBox(height: 8),
-                            const LinearProgressIndicator(),
+                            const LinearProgressIndicator(
+                              color: SejenakColor.secondary, 
+                              backgroundColor: SejenakColor.light,
+                            ),
                           ],
                         ],
                       ),
                     ),
-                    // Tombol kontrol audio
                     if (isLoading)
                       const SizedBox(
                         width: 28,
                         height: 28,
-                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          backgroundColor: SejenakColor.light,
+                          color: SejenakColor.secondary,
+                        ),
                       )
                     else if (isPlaying)
                       Row(
@@ -404,7 +436,7 @@ class _MeditationState extends State<Meditation> {
 
   void _navigateToMeditationPage() {
     print('Navigate to meditation page');
-    // TODO: Implement navigation
+    Navigator.pushReplacementNamed(context, '/meditation-list-page');
   }
 
   void _navigateToExercisePage() {

@@ -42,7 +42,7 @@ class MeditationService {
     try {
       final response = await _httpClient.get(API.meditationAudios);
       if (response.statusCode == 200) {
-        final List<dynamic> audiosData = response.data['audios']['data'];
+        final List<dynamic> audiosData = response.data['data'];
         return audiosData
             .map((json) => MeditationModels.fromJson(json))
             .toList();

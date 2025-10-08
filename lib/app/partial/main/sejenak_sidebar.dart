@@ -263,7 +263,7 @@ class SejenakSidebar extends StatelessWidget {
             await Future.delayed(Duration(milliseconds: 200));
             Navigator.pushReplacementNamed(
               context,
-              '/dashboard',
+              '/settings',
               result: (Route<dynamic> route) => false,
             );
           },
