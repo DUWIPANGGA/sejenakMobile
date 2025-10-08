@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:selena/app/components/sejenak_container.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/app/partial/main/sejenak_header_page.dart';
@@ -10,7 +10,6 @@ import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/services/meditation/meditation_service.dart';
 import 'package:selena/session/user_session.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Meditation extends StatefulWidget {
   final UserModels? user;
@@ -40,7 +39,7 @@ class _MeditationState extends State<Meditation> {
     } catch (e) {
       print('❌ Error initializing service: $e');
       setState(() {
-        errorMessage = "Gagal menginisialisasi layanan";
+        errorMessage = "Gagal menginisialisasi layanan audio";
         isLoading = false;
       });
     }
@@ -89,67 +88,7 @@ class _MeditationState extends State<Meditation> {
       ),
     );
   }
-Widget _buildAudioPlayerWithProgress() {
-  return Column(
-    children: [
-      _buildDailyMeditation(), // Widget yang sudah ada
-      const SizedBox(height: 10),
-      // Progress bar
-      StreamBuilder<Duration>(
-        stream: service.positionStream,
-        builder: (context, positionSnapshot) {
-          return StreamBuilder<Duration?>(
-            stream: service.durationStream,
-            builder: (context, durationSnapshot) {
-              final position = positionSnapshot.data ?? Duration.zero;
-              final duration = durationSnapshot.data ?? Duration.zero;
-              
-              if (duration.inSeconds == 0) return SizedBox();
-              
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    Slider(
-                      value: position.inSeconds.toDouble(),
-                      min: 0,
-                      max: duration.inSeconds.toDouble(),
-                      onChanged: (value) {
-                      },
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            _formatDuration(position),
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                          Text(
-                            _formatDuration(duration),
-                            style: TextStyle(fontSize: 12, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      ),
-    ],
-  );
-}
 
-String _formatDuration(Duration duration) {
-  String twoDigits(int n) => n.toString().padLeft(2, "0");
-  String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
-  String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
-  return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
-}
   Widget _buildErrorScreen() {
     return Scaffold(
       body: Center(
@@ -183,35 +122,35 @@ String _formatDuration(Duration duration) {
   }
 
   Widget _buildMainScreen() {
-  final user = widget.user;
-  return Scaffold(
-    body: CustomScrollView(
-      physics: const BouncingScrollPhysics(),
-      slivers: [
-        SliverToBoxAdapter(
-          child: SejenakHeaderPage(
-            text: "Meditasi",
-            profile: user?.user?.profil,
+    final user = widget.user;
+    return Scaffold(
+      body: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
+        slivers: [
+          SliverToBoxAdapter(
+            child: SejenakHeaderPage(
+              text: "Meditasi",
+              profile: user?.user?.profil,
+            ),
           ),
-        ),
-        SliverToBoxAdapter(
-          child: _buildWelcomeSection(),
-        ),
-        SliverToBoxAdapter(
-          child: _buildActionButtons(),
-        ),
-        SliverToBoxAdapter(
-          child: _buildAudioPlayerWithProgress(), // Ganti ini
-        ),
-        SliverToBoxAdapter(
-          child: _buildMeditationSummary(),
-        ),
-      ],
-    ),
-    endDrawer: SejenakSidebar(user: user),
-    bottomNavigationBar: SejenakNavbar(index: 2),
-  );
-}
+          SliverToBoxAdapter(
+            child: _buildWelcomeSection(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildActionButtons(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildDailyMeditation(),
+          ),
+          SliverToBoxAdapter(
+            child: _buildMeditationSummary(),
+          ),
+        ],
+      ),
+      endDrawer: SejenakSidebar(user: user),
+      bottomNavigationBar: SejenakNavbar(index: 2),
+    );
+  }
 
   Widget _buildWelcomeSection() {
     return Container(
@@ -334,13 +273,14 @@ String _formatDuration(Duration duration) {
   }
 
   Widget _buildDailyMeditation() {
-    return StreamBuilder<PlayerState>(
+    return StreamBuilder<PlaybackState>(
       stream: service.playbackState,
       builder: (context, snapshot) {
         final state = snapshot.data;
         final isPlaying = state?.playing ?? false;
-        final isProcessing = state?.processingState == ProcessingState.loading ||
-                            state?.processingState == ProcessingState.buffering;
+        final processingState = state?.processingState ?? AudioProcessingState.idle;
+        final isLoading = processingState == AudioProcessingState.loading ||
+                          processingState == AudioProcessingState.buffering;
 
         if (dailyMeditation == null) {
           return const Padding(
@@ -401,11 +341,16 @@ String _formatDuration(Duration duration) {
                             type: SejenakTextType.small,
                             color: SejenakColor.stroke,
                           ),
+                          // Progress indicator untuk loading
+                          if (isLoading) ...[
+                            const SizedBox(height: 8),
+                            const LinearProgressIndicator(),
+                          ],
                         ],
                       ),
                     ),
                     // Tombol kontrol audio
-                    if (isProcessing)
+                    if (isLoading)
                       const SizedBox(
                         width: 28,
                         height: 28,
@@ -430,7 +375,11 @@ String _formatDuration(Duration duration) {
                       IconButton(
                         icon: const Icon(Icons.play_arrow_rounded,
                             color: Colors.black54, size: 30),
-                        onPressed: () => service.playAudio(dailyMeditation!),
+                        onPressed: () {
+                          if (dailyMeditation != null) {
+                            service.playAudio(dailyMeditation!);
+                          }
+                        },
                       ),
                   ],
                 ),

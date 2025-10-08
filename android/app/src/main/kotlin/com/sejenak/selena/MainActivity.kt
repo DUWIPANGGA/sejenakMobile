@@ -1,7 +1,5 @@
 package com.sejenak.selena
 
-import io.flutter.embedding.android.FlutterActivity
+import com.ryanheise.audioservice.AudioServiceActivity
 
-class MainActivity: FlutterActivity() {
-    // Tidak perlu override apa-apa jika menggunakan konfigurasi default
-}
+class MainActivity: AudioServiceActivity()

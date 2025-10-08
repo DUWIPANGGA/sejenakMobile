@@ -7,19 +7,22 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="Selena"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
-        android:enableOnBackInvokedCallback="true">
+    android:name="${applicationName}"
+    android:label="Selena"
+    android:icon="@mipmap/ic_launcher"
+    android:enableOnBackInvokedCallback="true">
         
         <!-- Audio Service -->
         <service
             android:name="com.ryanheise.audioservice.AudioService"
-            android:exported="true">
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+
 
         <!-- Main Activity -->
         <activity

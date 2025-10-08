@@ -2,38 +2,42 @@ import 'package:audio_service/audio_service.dart';
 import 'package:selena/services/audio/audio_handler/audio_handler.dart';
 
 class AudioInitializer {
-  static SejenakAudioHandler? _instance;
-  static bool _isInitializing = false;
+  static bool _initializing = false;
+  static bool _initialized = false;
+  static late AudioHandler handler;
 
-  static Future<SejenakAudioHandler> getHandler() async {
-    if (_instance != null) return _instance!;
-    if (_isInitializing) {
-      // Wait if already initializing
-      await Future.delayed(const Duration(milliseconds: 100));
-      return getHandler();
+  static Future<void> init() async {
+    if (_initialized) {
+      print('⚠️ AudioInitializer sudah siap, skip init.');
+      return;
+    }
+    if (_initializing) {
+      print('⚠️ AudioInitializer masih berjalan, tunggu selesai...');
+      // Tunggu sampai selesai
+      while (!_initialized) {
+        await Future.delayed(const Duration(milliseconds: 200));
+      }
+      return;
     }
 
-    _isInitializing = true;
+    _initializing = true;
+    print('🎧 Memulai AudioInitializer.init()...');
+
     try {
-      _instance = await AudioService.init(
+      handler = await AudioService.init(
         builder: () => SejenakAudioHandler(),
         config: const AudioServiceConfig(
-          androidNotificationChannelId: 'com.sejenak.meditation.channel.audio',
-          androidNotificationChannelName: 'Meditation Audio',
+          androidNotificationChannelId: 'com.sejenak.selena.channel.audio',
+          androidNotificationChannelName: 'Selena Audio',
           androidNotificationOngoing: true,
-          androidStopForegroundOnPause: true,
-          androidNotificationIcon: 'mipmap/ic_launcher',
         ),
       );
-      return _instance!;
+      _initialized = true;
+      print('✅ AudioService berhasil diinisialisasi');
+    } catch (e) {
+      print('❌ Error initializing service: $e');
     } finally {
-      _isInitializing = false;
+      _initializing = false;
     }
-  }
-
-  // Cleanup method
-  static Future<void> dispose() async {
-    await _instance?.dispose();
-    _instance = null;
   }
 }

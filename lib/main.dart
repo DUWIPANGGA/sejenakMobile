@@ -1,20 +1,27 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:selena/firebase_options.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/screen/landing_page/landing_page.dart';
+import 'package:selena/services/audio/audio_initializer/audio_initializer.dart';
 import 'package:selena/session/user_session.dart';
 
 import 'routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await AudioInitializer.init();
+
   runApp(MainApp());
 }
+
+
 
 class MainApp extends StatelessWidget {
   final isLoggedIn = UserSession().isLoggedIn;
