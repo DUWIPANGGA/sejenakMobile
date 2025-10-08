@@ -14,7 +14,7 @@ import '../screen/meditation/meditation_list_page.dart';
 class SejenakRoute {
   static final Map<String, WidgetBuilder> routes = {
     '/comunity': (context) => Comunity(),
-    '/meditation-list-page': (context) => MeditationListPage(),
+    // '/meditation-list-page': (context) => MeditationListPage(),
     '/dashboard': (context) => Dashboard(),
     '/meditation': (context) => Meditation(),
     '/login': (context) => LoginScreen(),

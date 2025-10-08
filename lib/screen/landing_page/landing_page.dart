@@ -15,7 +15,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class _LandingPageState extends State<LandingPage> {
-  final GoogleAuthService googleAuth = GoogleAuthService();
+  // final GoogleAuthService googleAuth = GoogleAuthService();
   bool isLoading = false;
   void _loadUserSession() async {
     await UserSession().loadUserFromPrefs();
@@ -29,7 +29,7 @@ print("user is login = ${UserSession().isLoggedIn}");
     setState(() {
       isLoading = true;
     });
-    await googleAuth.login(context);
+    // await googleAuth.login(context);
     setState(() {
       isLoading = false;
     });

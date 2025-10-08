@@ -1,45 +1,19 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:selena/models/meditation_models/meditation_models.dart';
 import 'package:selena/services/api.dart';
-import 'package:selena/services/audio_handler/audio_handler.dart';
+import 'package:just_audio/just_audio.dart';
 
 class MeditationService {
   final DioHttpClient _httpClient = DioHttpClient.getInstance();
-  late final SejenakAudioHandler _audioHandler; // <-- jangan di-initialize di sini
-  bool _isAudioHandlerInitialized = false;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isInitialized = true; // Langsung true karena tidak butuh init complex
 
   MeditationService._(); // private constructor
 
   static Future<MeditationService> create() async {
     final service = MeditationService._();
-    await service._initAudioHandler();
+    // Tidak perlu init yang complex
+    print('✅ MeditationService created successfully');
     return service;
-  }
-
-  Future<void> _initAudioHandler() async {
-  if (_isAudioHandlerInitialized) return; // <-- penting supaya gak double init
-  try {
-    _audioHandler = await AudioService.init(
-      builder: () => SejenakAudioHandler(),
-      config: const AudioServiceConfig(
-        androidNotificationChannelId: 'com.sejenak.selena.audio',
-        androidNotificationChannelName: 'Sejenak Meditation',
-        androidNotificationOngoing: true,
-      ),
-    );
-    _isAudioHandlerInitialized = true;
-    print('✅ AudioHandler initialized successfully');
-  } catch (e) {
-    print('❌ Error initializing AudioHandler: $e');
-    _isAudioHandlerInitialized = false;
-  }
-}
-
-  SejenakAudioHandler get handler {
-    if (!_isAudioHandlerInitialized) {
-      throw Exception('AudioHandler not initialized');
-    }
-    return _audioHandler;
   }
 
   /// Ambil list audio meditation dari API
@@ -79,25 +53,57 @@ class MeditationService {
     }
   }
 
-  /// Mainkan audio meditation
+  /// Mainkan audio meditation dengan Just Audio
   Future<void> playAudio(MeditationModels model) async {
     final String audioUrl = "${API.endpointImage}storage/${model.filePath}";
     print('🎧 Playing meditation audio from: $audioUrl');
-    await _audioHandler.playFromUrl(audioUrl, model.title);
+    
+    try {
+      await _audioPlayer.setUrl(audioUrl);
+      await _audioPlayer.play();
+    } catch (e) {
+      print('❌ Error playing audio: $e');
+      rethrow;
+    }
   }
 
   /// Pause audio
-  Future<void> pauseAudio() async => _audioHandler.pause();
+  Future<void> pauseAudio() async {
+    await _audioPlayer.pause();
+  }
 
   /// Resume audio
-  Future<void> resumeAudio() async => _audioHandler.play();
+  Future<void> resumeAudio() async {
+    await _audioPlayer.play();
+  }
 
   /// Stop audio
-  Future<void> stopAudio() async => _audioHandler.stop();
+  Future<void> stopAudio() async {
+    await _audioPlayer.stop();
+  }
 
-  /// Stream untuk UI update (posisi, state, dll)
-  Stream<PlaybackState> get playbackState => _audioHandler.playbackState;
+  /// Seek to position
+  Future<void> seekAudio(Duration position) async {
+    await _audioPlayer.seek(position);
+  }
 
-  /// Stream untuk media item
-  Stream<MediaItem?> get currentMediaItem => _audioHandler.mediaItem;
+  /// Stream untuk UI update
+  Stream<PlayerState> get playbackState => _audioPlayer.playerStateStream;
+
+  /// Stream untuk position
+  Stream<Duration> get positionStream => _audioPlayer.positionStream;
+
+  /// Stream untuk duration
+  Stream<Duration?> get durationStream => _audioPlayer.durationStream;
+
+  /// Check if audio is playing
+  Stream<bool> get isPlayingStream => _audioPlayer.playingStream;
+
+  /// Get current playing state
+  bool get isPlaying => _audioPlayer.playing;
+
+  /// Dispose resources
+  Future<void> dispose() async {
+    await _audioPlayer.dispose();
+  }
 }

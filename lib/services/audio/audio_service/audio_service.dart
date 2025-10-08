@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:selena/models/meditation_models/meditation_models.dart';
 import 'package:selena/services/api.dart';
-import 'package:selena/services/audio_handler/audio_handler.dart';
+import 'package:selena/services/audio/audio_handler/audio_handler.dart';
 class MeditationService {
   final DioHttpClient _httpClient = DioHttpClient.getInstance();
   late final SejenakAudioHandler _audioHandler; // <-- jangan di-initialize di sini

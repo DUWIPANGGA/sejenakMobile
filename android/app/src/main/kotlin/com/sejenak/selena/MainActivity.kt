@@ -1,6 +1,7 @@
 package com.sejenak.selena
 
-import io.flutter.embedding.android.FlutterFragmentActivity
+import io.flutter.embedding.android.FlutterActivity
 
-class MainActivity: FlutterFragmentActivity() {
+class MainActivity: FlutterActivity() {
+    // Tidak perlu override apa-apa jika menggunakan konfigurasi default
 }

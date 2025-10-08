@@ -1,5 +1,5 @@
-import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:selena/app/components/sejenak_container.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/app/partial/main/sejenak_header_page.dart';
@@ -8,26 +8,23 @@ import 'package:selena/app/partial/sejenak_navbar.dart';
 import 'package:selena/models/meditation_models/meditation_models.dart';
 import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/root/sejenak_color.dart';
-import 'package:selena/services/meditation/meditation_service.dart'; // import service kamu
+import 'package:selena/services/meditation/meditation_service.dart';
 import 'package:selena/session/user_session.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class Meditation extends StatefulWidget {
   final UserModels? user;
-final Future<MeditationService> serviceFuture;
-  Meditation({super.key}) : user = UserSession().user,
-        serviceFuture = MeditationService.create();
+  
+  Meditation({super.key}) : user = UserSession().user;
 
   @override
   State<Meditation> createState() => _MeditationState();
 }
 
-
 class _MeditationState extends State<Meditation> {
-MeditationModels? dailyMeditation;
+  MeditationModels? dailyMeditation;
   late MeditationService service;
-  bool isServiceReady = false;
- bool isLoading = true;
+  bool isLoading = true;
   String? errorMessage;
 
   @override
@@ -37,61 +34,184 @@ MeditationModels? dailyMeditation;
   }
 
   Future<void> _initService() async {
-    service = await MeditationService.create();
-    setState(() {
-      isServiceReady = true;
-    });
-    _fetchDailyMeditation();
+    try {
+      service = await MeditationService.create();
+      await _fetchDailyMeditation();
+    } catch (e) {
+      print('❌ Error initializing service: $e');
+      setState(() {
+        errorMessage = "Gagal menginisialisasi layanan";
+        isLoading = false;
+      });
+    }
   }
-  Future<void> _fetchDailyMeditation() async {
-  try {
-    final result = await service.getDailyMeditation();
-    setState(() {
-      dailyMeditation = result;
-      isLoading = false;
-    });
-  } catch (e) {
-    print('❌ Error fetching daily meditation: $e');
-    setState(() {
-      errorMessage = e.toString();
-      isLoading = false;
-    });
-  }
-}
 
+  Future<void> _fetchDailyMeditation() async {
+    try {
+      final result = await service.getDailyMeditation();
+      setState(() {
+        dailyMeditation = result;
+        isLoading = false;
+      });
+    } catch (e) {
+      print('❌ Error fetching daily meditation: $e');
+      setState(() {
+        errorMessage = "Gagal memuat meditasi harian";
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final user = widget.user;
+    if (isLoading) {
+      return _buildLoadingScreen();
+    }
 
+    if (errorMessage != null) {
+      return _buildErrorScreen();
+    }
+
+    return _buildMainScreen();
+  }
+
+  Widget _buildLoadingScreen() {
     return Scaffold(
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          SliverToBoxAdapter(
-            child: SejenakHeaderPage(
-              text: "Meditasi",
-              profile: user?.user?.profil,
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: _buildWelcomeSection(),
-          ),
-          SliverToBoxAdapter(
-            child: _buildActionButtons(),
-          ),
-          SliverToBoxAdapter(
-            child: _buildDailyWhiteNoise(),
-          ),
-          SliverToBoxAdapter(
-            child: _buildMeditationSummary(),
-          ),
-        ],
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Menyiapkan meditasi...'),
+          ],
+        ),
       ),
-      endDrawer: SejenakSidebar(user: user),
-      bottomNavigationBar: SejenakNavbar(index: 2),
     );
   }
+Widget _buildAudioPlayerWithProgress() {
+  return Column(
+    children: [
+      _buildDailyMeditation(), // Widget yang sudah ada
+      const SizedBox(height: 10),
+      // Progress bar
+      StreamBuilder<Duration>(
+        stream: service.positionStream,
+        builder: (context, positionSnapshot) {
+          return StreamBuilder<Duration?>(
+            stream: service.durationStream,
+            builder: (context, durationSnapshot) {
+              final position = positionSnapshot.data ?? Duration.zero;
+              final duration = durationSnapshot.data ?? Duration.zero;
+              
+              if (duration.inSeconds == 0) return SizedBox();
+              
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    Slider(
+                      value: position.inSeconds.toDouble(),
+                      min: 0,
+                      max: duration.inSeconds.toDouble(),
+                      onChanged: (value) {
+                      },
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatDuration(position),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                          Text(
+                            _formatDuration(duration),
+                            style: TextStyle(fontSize: 12, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    ],
+  );
+}
+
+String _formatDuration(Duration duration) {
+  String twoDigits(int n) => n.toString().padLeft(2, "0");
+  String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+  String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+  return "${twoDigits(duration.inHours)}:$twoDigitMinutes:$twoDigitSeconds";
+}
+  Widget _buildErrorScreen() {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 64, color: Colors.red),
+              SizedBox(height: 16),
+              Text(
+                'Terjadi Kesalahan',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text(
+                errorMessage!,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.grey),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _initService,
+                child: Text('Coba Lagi'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMainScreen() {
+  final user = widget.user;
+  return Scaffold(
+    body: CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        SliverToBoxAdapter(
+          child: SejenakHeaderPage(
+            text: "Meditasi",
+            profile: user?.user?.profil,
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: _buildWelcomeSection(),
+        ),
+        SliverToBoxAdapter(
+          child: _buildActionButtons(),
+        ),
+        SliverToBoxAdapter(
+          child: _buildAudioPlayerWithProgress(), // Ganti ini
+        ),
+        SliverToBoxAdapter(
+          child: _buildMeditationSummary(),
+        ),
+      ],
+    ),
+    endDrawer: SejenakSidebar(user: user),
+    bottomNavigationBar: SejenakNavbar(index: 2),
+  );
+}
 
   Widget _buildWelcomeSection() {
     return Container(
@@ -112,8 +232,7 @@ MeditationModels? dailyMeditation;
                   ),
                   SizedBox(height: 4),
                   SejenakText(
-                    text:
-                        "Temukan kedamaian dan ketenangan melalui latihan mindfulness",
+                    text: "Temukan kedamaian dan ketenangan melalui latihan mindfulness",
                     type: SejenakTextType.small,
                   ),
                 ],
@@ -136,10 +255,7 @@ MeditationModels? dailyMeditation;
               subtitle: "Latihan mindfulness",
               icon: Icons.spa_rounded,
               color: SejenakColor.primary,
-              onTap: () {
-                // Navigate to meditation page
-                _navigateToMeditationPage();
-              },
+              onTap: _navigateToMeditationPage,
             ),
           ),
           const SizedBox(width: 12),
@@ -149,10 +265,7 @@ MeditationModels? dailyMeditation;
               subtitle: "Latihan pernapasan",
               icon: Icons.fitness_center_rounded,
               color: SejenakColor.secondary,
-              onTap: () {
-                // Navigate to exercise page
-                _navigateToExercisePage();
-              },
+              onTap: _navigateToExercisePage,
             ),
           ),
         ],
@@ -220,137 +333,114 @@ MeditationModels? dailyMeditation;
     );
   }
 
-  Widget _buildDailyWhiteNoise() {
-  return StreamBuilder<PlaybackState?>(
-    stream: service.handler.playbackStateStream,
-    builder: (context, snapshot) {
-      final state = snapshot.data;
-      final processingState = state?.processingState ?? AudioProcessingState.idle;
-      final isPlaying = state?.playing ?? false;
-      final isLoading = processingState == AudioProcessingState.loading ||
-          processingState == AudioProcessingState.buffering;
+  Widget _buildDailyMeditation() {
+    return StreamBuilder<PlayerState>(
+      stream: service.playbackState,
+      builder: (context, snapshot) {
+        final state = snapshot.data;
+        final isPlaying = state?.playing ?? false;
+        final isProcessing = state?.processingState == ProcessingState.loading ||
+                            state?.processingState == ProcessingState.buffering;
 
-      if (isLoading) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
-
-      if (errorMessage != null) {
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: SejenakText(
-            text: "Gagal memuat data meditasi: $errorMessage",
-            type: SejenakTextType.small,
-            color: Colors.red,
-          ),
-        );
-      }
-
-      if (dailyMeditation == null) {
-        return const Padding(
-          padding: EdgeInsets.all(16),
-          child: SejenakText(
-            text: "Belum ada meditasi harian untuk hari ini.",
-            type: SejenakTextType.small,
-          ),
-        );
-      }
-
-      final title = dailyMeditation!.title;
-      final desc = "Nikmati sesi ${dailyMeditation!.category} hari ini";
-
-      return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-        child: Container(
-          decoration: BoxDecoration(
-            color: SejenakColor.secondary.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              width: 1.0,
-              color: SejenakColor.secondary.withOpacity(0.3),
+        if (dailyMeditation == null) {
+          return const Padding(
+            padding: EdgeInsets.all(16),
+            child: SejenakText(
+              text: "Belum ada meditasi harian untuk hari ini.",
+              type: SejenakTextType.small,
             ),
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      color: SejenakColor.secondary,
-                      borderRadius: BorderRadius.circular(12),
+          );
+        }
+
+        final title = dailyMeditation!.title;
+        final desc = "Nikmati sesi ${dailyMeditation!.category} hari ini";
+
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          child: Container(
+            decoration: BoxDecoration(
+              color: SejenakColor.secondary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                width: 1.0,
+                color: SejenakColor.secondary.withOpacity(0.3),
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: SejenakColor.secondary,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.spa_rounded,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.spa_rounded,
-                      color: Colors.white,
-                      size: 30,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SejenakText(
+                            text: title,
+                            type: SejenakTextType.h5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          const SizedBox(height: 4),
+                          SejenakText(
+                            text: desc,
+                            type: SejenakTextType.small,
+                            color: SejenakColor.stroke,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SejenakText(
-                          text: title,
-                          type: SejenakTextType.h5,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        const SizedBox(height: 4),
-                        SejenakText(
-                          text: desc,
-                          type: SejenakTextType.small,
-                          color: SejenakColor.stroke,
-                        ),
-                      ],
-                    ),
-                  ),
-                  // 🎧 Tombol kontrol audio
-                  if (isLoading)
-                    const SizedBox(
-                      width: 28,
-                      height: 28,
-                      child: CircularProgressIndicator(strokeWidth: 2.5),
-                    )
-                  else if (isPlaying)
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.pause_rounded,
-                              color: Colors.black54, size: 30),
-                          onPressed: () async => await service.pauseAudio(),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.stop_rounded,
-                              color: Colors.redAccent, size: 30),
-                          onPressed: () async => await service.stopAudio(),
-                        ),
-                      ],
-                    )
-                  else
-                    IconButton(
-                      icon: const Icon(Icons.play_arrow_rounded,
-                          color: Colors.black54, size: 30),
-                      onPressed: () async {
-                        await service.playAudio(dailyMeditation!);
-                      },
-                    ),
-                ],
+                    // Tombol kontrol audio
+                    if (isProcessing)
+                      const SizedBox(
+                        width: 28,
+                        height: 28,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      )
+                    else if (isPlaying)
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.pause_rounded,
+                                color: Colors.black54, size: 30),
+                            onPressed: () => service.pauseAudio(),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.stop_rounded,
+                                color: Colors.redAccent, size: 30),
+                            onPressed: () => service.stopAudio(),
+                          ),
+                        ],
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(Icons.play_arrow_rounded,
+                            color: Colors.black54, size: 30),
+                        onPressed: () => service.playAudio(dailyMeditation!),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   Widget _buildMeditationSummary() {
     return Padding(
@@ -363,24 +453,19 @@ MeditationModels? dailyMeditation;
     );
   }
 
-  Future<void> _launchWhiteNoiseURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      throw 'Could not launch $url';
-    }
-  }
-
   void _navigateToMeditationPage() {
-    // TODO: Implement navigation to meditation page
-    // Contoh: Navigator.push(context, MaterialPageRoute(builder: (context) => MeditationListPage()));
     print('Navigate to meditation page');
+    // TODO: Implement navigation
   }
 
   void _navigateToExercisePage() {
-    // TODO: Implement navigation to exercise page
-    // Contoh: Navigator.push(context, MaterialPageRoute(builder: (context) => ExerciseListPage()));
     print('Navigate to exercise page');
+    // TODO: Implement navigation
+  }
+
+  @override
+  void dispose() {
+    service.dispose();
+    super.dispose();
   }
 }
