@@ -51,7 +51,7 @@ class Comunity extends StatelessWidget {
       ),
       endDrawer: SejenakSidebar(user: mySession),
       floatingActionButton: SejenakFloatingButton(
-        onPressed: () => SejenakCreatePost(id: 1).showCreateContainer(context),
+        onPressed: () => SejenakCreatePost().showCreateContainer(context),
       ),
       bottomNavigationBar: SejenakNavbar(index: 1),
     );
@@ -149,7 +149,7 @@ class Comunity extends StatelessWidget {
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
-                      onTap: () => SejenakCreatePost(id: 1).showCreateContainer(context),
+                      onTap: () => SejenakCreatePost().showCreateContainer(context),
                       child: Center(
                         child: Row(
                           mainAxisSize: MainAxisSize.min,

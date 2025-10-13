@@ -85,7 +85,7 @@ class Dashboard extends StatelessWidget {
       ),
       endDrawer: SejenakSidebar(user: mySession),
       floatingActionButton: SejenakFloatingButton(
-        onPressed: () => SejenakCreatePost(id: 1).showCreateContainer(context),
+        onPressed: () => SejenakCreatePost().showCreateContainer(context),
       ),
       bottomNavigationBar: SejenakNavbar(index: 0),
     );
