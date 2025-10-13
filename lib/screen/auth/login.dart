@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 16,
                     ),
                     SejenakTextField(
-                      text: "Name",
+                      text: "Email",
                       controller: sejenak.name,
                     ),
                     SizedBox(

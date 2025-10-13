@@ -1,5 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:selena/app/helper/get_local_assets_url.dart';
 import 'package:selena/models/meditation_models/meditation_models.dart';
 import 'package:selena/services/api.dart';
 import 'package:selena/services/audio/audio_initializer/audio_initializer.dart';
@@ -79,12 +80,13 @@ class MeditationService {
 
     final String audioUrl = "${API.endpointImage}storage/${model.filePath}";
     print('🎧 Playing meditation audio from: $audioUrl');
+final artUri = await getLocalAssetImageUri('assets/splash/splash.png');
 
     final mediaItem = MediaItem(
       id: audioUrl,
       title: model.title,
       artist: "Meditation Daily",
-      // artUri: Uri.parse("${API.endpointImage}storage/${model.thumbnail ?? ''}"),
+      artUri: artUri,
     );
 
     await audioHandler.updateMediaItem(mediaItem);

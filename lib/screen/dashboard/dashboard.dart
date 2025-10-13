@@ -30,6 +30,8 @@ class Dashboard extends StatelessWidget {
         comunityAction = ComunityAction(UserSession().user!),
         recentPosts = ComunityServices(UserSession().user!).getAllMyPosts() {
     assert(mySession != null, "User tidak boleh null!");
+    print(mySession!.user!.toString());
+
   }
 
   @override

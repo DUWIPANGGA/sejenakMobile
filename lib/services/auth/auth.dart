@@ -67,8 +67,10 @@ class SejenakApiAuthService implements SejenakAuth, AuthWithRegister {
     } catch (e) {
       if (e is DioException) {
         print("Dio Error: ${e.response?.statusCode}");
-        print("Message: ${e.response?.data}");
-        showErrorDialog(context, "login gagal! Silakan coba lagi!");
+  print("Message: ${e.response?.data}");
+
+  final errorMessage = e.response?.data['message'] ?? 'Terjadi kesalahan';
+  showErrorDialog(context, errorMessage);
       } else {
         print("Error: $e");
       }
@@ -196,9 +198,9 @@ class GoogleAuthService implements SejenakAuth {
   final GoogleSignIn _googleSignIn = GoogleSignIn(
       scopes: ['email', 'profile', 'openid'],
       serverClientId:
-          '482406091527-1ar496hfu5qeriendtge6f52bcsd19mv.apps.googleusercontent.com',
+          '550689254127-ja7pf95dlkjqd6v4aiv745l20ab689d5.apps.googleusercontent.com',
       clientId:
-          '226311772731-qq0jphmrarn64nftf2iv312jobllinif.apps.googleusercontent.com');
+          '550689254127-mt8fvk5hohjrradridrgru8tq6r1p324.apps.googleusercontent.com');
   @override
   Future<void> login(BuildContext context) async {
     try {
@@ -222,12 +224,13 @@ class GoogleAuthService implements SejenakAuth {
       if (googleAuth.idToken == null) {
         showErrorDialog(context, "Login gagal! ID Token tidak ditemukan.");
         return;
-      }
+      }     
       try {
         DioHttpClient.getInstance().setToken(firebaseIdToken!);
         final response = await DioHttpClient.getInstance().post(
           API.googleAuth,
           data: {
+            'access_token' : googleAuth.accessToken,
             'name': googleUser.displayName,
             'username': googleUser.displayName,
             'email': googleUser.email,
@@ -247,7 +250,7 @@ class GoogleAuthService implements SejenakAuth {
           ));
           DioHttpClient.getInstance().setToken(response.data["token"]);
 
-          Navigator.pushReplacementNamed(context, '/comunity');
+          Navigator.pushReplacementNamed(context, '/dashboard');
         }
       } catch (e) {
         if (e is DioException) {

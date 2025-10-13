@@ -98,6 +98,27 @@ class User {
   }
 
   @override
+  String toString() {
+    return '''
+User(
+  id: $id,
+  username: $username,
+  name: $name,
+  email: $email,
+  role: $role,
+  isAhli: $isAhli,
+  premium: $premium,
+  profil: $profil,
+  deskripsiProfil: $deskripsiProfil,
+  avatar: $avatar,
+  googleId: $googleId,
+  createdAt: $createdAt,
+  updatedAt: $updatedAt
+)
+''';
+  }
+
+  @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
     if (other is! User) return false;

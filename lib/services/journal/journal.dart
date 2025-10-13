@@ -29,7 +29,11 @@ class JournalApiService implements JournalService {
         final List<dynamic> journalList = response.data['data']['data'];
         _journals = JournalModels.fromJsonList(journalList);
 
-        print("Parsed Journals: $_journals");
+        print("Parsed Journals:");
+for (var j in _journals) {
+  print("📝 ${j.entriesId} | ${j.title} | ${j.content}");
+}
+
         return _journals;
       } else {
         throw Exception("Unexpected response format: ${response.data}");

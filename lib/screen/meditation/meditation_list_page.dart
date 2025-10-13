@@ -88,7 +88,7 @@ class _MeditationListPageState extends State<MeditationListPage> {
         slivers: [
           SliverToBoxAdapter(
             child: SejenakHeaderPage(
-              text: "Daftar Meditasi",
+              text: "Meditasi",
               profile: user?.user?.profil,
             ),
           ),

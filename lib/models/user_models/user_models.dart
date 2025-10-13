@@ -79,6 +79,27 @@ class UserModels {
     final mapEquals = const DeepCollectionEquality().equals;
     return mapEquals(other.toJson(), toJson());
   }
+  
+@override
+String toString() {
+  return '''
+UserModels(
+  code: $code,
+  status: $status,
+  token: $token,
+  refreshToken: $refreshToken,
+  expiresIn: $expiresIn,
+  refreshExpiresIn: $refreshExpiresIn,
+  user: ${user?.toString()},
+  totalPost: $totalPost,
+  totalJournal: $totalJournal,
+  totalLike: $totalLike,
+  journalThisMonth: $journalThisMonth,
+  journalStreak: $journalStreak,
+  postStreak: $postStreak
+)
+''';
+}
 
   @override
   int get hashCode =>

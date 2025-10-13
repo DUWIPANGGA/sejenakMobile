@@ -6,6 +6,7 @@ import 'package:selena/app/partial/main/sejenak_sidebar.dart';
 import 'package:selena/app/partial/sejenak_navbar.dart';
 import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/root/sejenak_color.dart';
+import 'package:selena/screen/chat/chat_bot.dart';
 import 'package:selena/session/user_session.dart';
 
 class Counseling extends StatelessWidget {
@@ -121,80 +122,88 @@ class Counseling extends StatelessWidget {
       'title': 'Chat AI',
       'subtitle': 'Konsultasi cepat dengan AI Assistant',
       'color': SejenakColor.secondary,
-      'route': '/chat',
+      'onTap': () {
+        ChatBotScreen().showChat(context);
+      },
     },
     {
-      'icon': Icons.person_rounded, // aman dipakai di semua versi Flutter
+      'icon': Icons.person_rounded,
       'title': 'Chat Konselor',
       'subtitle': 'Ngobrol dengan konselor profesional',
       'color': SejenakColor.primary,
-      'route': '/chat-konselor',
+      'onTap': () {
+        // Navigasi ke halaman chat konselor (atau modal lain)
+        Navigator.pushNamed(context, '/chat-konselor');
+      },
     },
   ];
 
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SejenakText(
-          text: "Layanan Cepat",
+        const SejenakText(
+          text: "Aksi Cepat",
           type: SejenakTextType.h5,
           fontWeight: FontWeight.bold,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 10),
         Column(
           children: actions.map((action) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              decoration: BoxDecoration(
-                color: (action['color'] as Color).withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  width: 1.0,
-                  color: (action['color'] as Color).withOpacity(0.3),
-                ),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
+            return GestureDetector(
+              onTap: action['onTap'] as VoidCallback,
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: SejenakColor.primary,
                   borderRadius: BorderRadius.circular(16),
-                  onTap: () {
-                    Navigator.pushNamed(context, action['route'] as String);
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Icon(
-                          action['icon'] as IconData,
-                          color: action['color'] as Color,
-                          size: 28,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SejenakText(
-                                text: action['title'] as String,
-                                type: SejenakTextType.regular,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              const SizedBox(height: 4),
-                              SejenakText(
-                                text: action['subtitle'] as String,
-                                type: SejenakTextType.small,
-                                color: SejenakColor.stroke,
-                              ),
-                            ],
-                          ),
-                        ),
-                        const Icon(Icons.arrow_forward_ios_rounded,
-                            size: 16, color: Colors.grey),
-                      ],
+                  border: Border.all(width: 1, color: Colors.grey[900]!),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: SejenakColor.black,
+                      spreadRadius: 0.3,
+                      blurRadius: 0,
+                      offset: Offset(0.3, 3),
                     ),
-                  ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: action['color'] as Color,
+                        shape: BoxShape.circle,
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Icon(
+                        action['icon'] as IconData,
+                        color: SejenakColor.white,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SejenakText(
+                            text: action['title'] as String,
+                            type: SejenakTextType.h5,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          SejenakText(
+                            text: action['subtitle'] as String,
+                            type: SejenakTextType.small,
+                            color: SejenakColor.stroke,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded,
+                        color: SejenakColor.stroke, size: 18),
+                  ],
                 ),
               ),
             );
