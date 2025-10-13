@@ -109,16 +109,16 @@ class ChatBotScreen {
             child: const Icon(Icons.cancel_outlined, color: SejenakColor.secondary),
           ),
           const SizedBox(width: 10),
-          ClipOval(
-            child: Image.network(
-              "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
-              width: 35,
-              height: 35,
-              fit: BoxFit.cover,
-            ),
-          ),
+          // ClipOval(
+          //   child: Image.network(
+          //     "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+          //     width: 35,
+          //     height: 35,
+          //     fit: BoxFit.cover,
+          //   ),
+          // ),
           const SizedBox(width: 8),
-          const SejenakText(text: "Sejenak ChatBot"),
+          const SejenakText(text: "Nemo"),
         ],
       ),
     );

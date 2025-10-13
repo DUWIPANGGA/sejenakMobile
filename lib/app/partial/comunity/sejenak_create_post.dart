@@ -13,6 +13,7 @@ import 'package:selena/session/user_session.dart';
 
 class SejenakCreatePost {
   final int? id; // Null untuk create, ada value untuk edit
+  late bool isCreate;
   final String? initialTitle;
   final String? initialContent;
   final String? initialImage;
@@ -37,6 +38,7 @@ class SejenakCreatePost {
     this.initialContent,
     this.initialImage,
     this.initialIsAnonymous,
+    this.isCreate = false
   }) {
     final user = UserSession().user;
     if (user == null) {
@@ -398,14 +400,14 @@ class SejenakCreatePost {
 
       // Create atau Update PostModels object
       final PostModels post = PostModels(
-        postId: id, 
+        postId: id,
         title: title,
         deskripsiPost: content,
         postPicture: image?.path ?? initialImage, // Gunakan image baru atau existing
         isAnonymous: isAnonymous,
       );
 
-      if (id != null) {
+      if (isCreate == false) {
         await comunity.updatePost(post);
       } else {
         await comunity.createPost(post);
