@@ -108,7 +108,7 @@ Future<void> createJournal(JournalModels journal) async {
 
     if (e.type == DioExceptionType.connectionError ||
         e.message!.contains('Failed host lookup')) {
-      print("📡 No internet detected. Saving journal to pending cache...");
+      print("No internet detected. Saving journal to pending cache...");
 
       // Simpan ke pending cache
       await AppPreferences.savePendingJournal(journal.toJson());
@@ -123,7 +123,7 @@ Future<void> syncPendingJournals() async {
   final pendingJournals = await AppPreferences.loadPendingJournals();
 
   if (pendingJournals.isEmpty) {
-    print("📭 No pending journals to sync.");
+    print("No pending journals to sync.");
     return;
   }
 
@@ -133,9 +133,9 @@ Future<void> syncPendingJournals() async {
     try {
       await _httpClient.post(API.journal, data: pendingJournals[i]);
       await AppPreferences.clearPendingJournalAt(i);
-      print("✅ Synced journal ${i + 1}/${pendingJournals.length}");
+      print("Synced journal ${i + 1}/${pendingJournals.length}");
     } on DioException catch (e) {
-      print("⚠️ Failed to sync journal ${i + 1}: ${e.message}");
+      print("Failed to sync journal ${i + 1}: ${e.message}");
       break; // stop sync kalau masih offline
     }
   }

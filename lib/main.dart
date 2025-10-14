@@ -29,6 +29,7 @@ Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
 
   if (result != ConnectivityResult.none) {
     journalService.syncPendingJournals();
+    print("syncPendingJournals action");
   }
 });
 

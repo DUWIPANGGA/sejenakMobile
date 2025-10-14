@@ -43,7 +43,7 @@ class Dashboard extends StatelessWidget {
           SliverToBoxAdapter(
             child: SejenakHeaderPage(
               text: "Dashboard",
-              profile: mySession!.user!.profil,
+              profile: mySession!.user!.avatar,
             ),
           ),
 
@@ -597,7 +597,7 @@ class Dashboard extends StatelessWidget {
         name: post.user?.username ?? "anonymous",
         isLike: post.isLikedByMe(mySession?.user?.id),
         date: post.createdAt!.substring(0, 10),
-        commentAction: () => SejenakDetailPost(post: post).showDetail(context),
+        commentAction: () =>SejenakDetailPost.showDetail(context, post),
         likeAction: (bool isLiked, int postID) async {
           comunityAction.likePost(isLiked, post.postId!);
         },

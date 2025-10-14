@@ -110,8 +110,18 @@ print('post');
       ),
       endDrawer: SejenakSidebar(user: mySession),
       floatingActionButton: SejenakFloatingButton(
-        onPressed: () => SejenakCreatePost().showCreateContainer(context),
-      ),
+  onPressed: () {
+    final user = UserSession().user;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Kamu harus login dulu untuk membuat post")),
+      );
+      return;
+    }
+    SejenakCreatePost(isCreate: true).showCreateContainer(context);
+  },
+),
+
       bottomNavigationBar: SejenakNavbar(index: 1),
     );
   }
@@ -127,7 +137,7 @@ print('post');
         children: [
           SejenakHeaderPage(
             text: "Komunitas",
-            profile: mySession!.user!.profil,
+            profile: mySession!.user!.avatar,
           ),
           Expanded(
             child: Center(
@@ -152,7 +162,7 @@ print('post');
         children: [
           SejenakHeaderPage(
             text: "Komunitas",
-            profile: mySession!.user!.profil,
+            profile: mySession!.user!.avatar,
           ),
           Expanded(
             child: SejenakError(message: error),
@@ -164,7 +174,7 @@ print('post');
         children: [
           SejenakHeaderPage(
             text: "Komunitas",
-            profile: mySession!.user!.profil,
+            profile: mySession!.user!.avatar,
           ),
           _buildCommunityStats(0, 0, 0),
           Expanded(
@@ -242,7 +252,7 @@ print('post');
         SliverToBoxAdapter(
           child: SejenakHeaderPage(
             text: "Komunitas",
-            profile: mySession!.user!.profil,
+            profile: mySession!.user!.avatar,
           ),
         ),
         SliverToBoxAdapter(
@@ -391,7 +401,8 @@ print('post');
           isLike: post.isLikedByMe(mySession?.user?.id),
           date: post.createdAt!.substring(0, 10),
           commentAction: () =>
-              SejenakDetailPost(post: post).showDetail(context),
+          SejenakDetailPost.showDetail(context, post),
+
           likeAction: (bool isLiked, int postID) async {
             comunityAction.likePost(isLiked, post.postId!);
           },

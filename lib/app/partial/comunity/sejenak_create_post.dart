@@ -32,20 +32,21 @@ class SejenakCreatePost {
   
   late final ComunityServices comunity;
 
-  SejenakCreatePost({
-    this.id, // Null untuk create, ada value untuk edit
-    this.initialTitle,
-    this.initialContent,
-    this.initialImage,
-    this.initialIsAnonymous,
-    this.isCreate = false
-  }) {
-    final user = UserSession().user;
-    if (user == null) {
-      throw Exception("User belum login, tidak bisa membuat post!");
-    }
-    comunity = ComunityServices(user);
+SejenakCreatePost({
+  this.id,
+  this.initialTitle,
+  this.initialContent,
+  this.initialImage,
+  this.initialIsAnonymous,
+  this.isCreate = false
+}) {
+  final user = UserSession().user;
+  if (user == null) {
+    throw Exception("User belum login, tidak bisa membuat post!");
   }
+  comunity = ComunityServices(user);
+}
+
 
   void showCreateContainer(BuildContext context) {
     final quill.QuillController _quillController = quill.QuillController.basic();

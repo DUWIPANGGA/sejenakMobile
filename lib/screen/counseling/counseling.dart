@@ -25,7 +25,7 @@ class Counseling extends StatelessWidget {
           SliverToBoxAdapter(
             child: SejenakHeaderPage(
               text: "Konseling",
-              profile: mySession!.user!.profil,
+              profile: mySession!.user!.avatar,
             ),
           ),
           

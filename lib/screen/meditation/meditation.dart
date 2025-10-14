@@ -3,6 +3,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:selena/app/components/sejenak_container.dart';
 import 'package:selena/app/components/sejenak_text.dart';
 import 'package:selena/app/partial/main/sejenak_circular.dart';
+import 'package:selena/app/partial/main/sejenak_error.dart';
 import 'package:selena/app/partial/main/sejenak_header_page.dart';
 import 'package:selena/app/partial/main/sejenak_sidebar.dart';
 import 'package:selena/app/partial/sejenak_navbar.dart';
@@ -43,7 +44,8 @@ class _MeditationState extends State<Meditation> {
       return [service, meditation];
     } catch (e) {
       print('❌ Error initializing: $e');
-      rethrow;
+      return [service, null];
+
     }
   }
 
@@ -51,23 +53,29 @@ class _MeditationState extends State<Meditation> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder<List<dynamic>>(
-        future: _initializationFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _buildLoadingState();
-          } else if (snapshot.hasError) {
-            return _buildErrorState(snapshot.error.toString());
-          } else if (!snapshot.hasData || snapshot.data!.length < 2) {
-            return _buildEmptyState(context);
-          }
+  future: _initializationFuture,
+  builder: (context, snapshot) {
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return _buildLoadingState();
+    }
 
-          // Extract data from snapshot
-          service = snapshot.data![0] as MeditationService;
-          dailyMeditation = snapshot.data![1] as MeditationModels?;
-          
-          return _buildMainContent(context);
-        },
-      ),
+    // kalau error, jangan return SejenakError, tapi tampilkan UI dengan state kosong
+    if (snapshot.hasError) {
+      print("⚠️ Meditation page error: ${snapshot.error}");
+      return _buildMainContent(context); // tetap tampil, tapi tanpa data
+    }
+
+    if (!snapshot.hasData || snapshot.data!.length < 2) {
+      return _buildEmptyState(context);
+    }
+
+    service = snapshot.data![0] as MeditationService;
+    dailyMeditation = snapshot.data![1] as MeditationModels?;
+
+    return _buildMainContent(context);
+  },
+),
+
       endDrawer: SejenakSidebar(user: widget.user),
       bottomNavigationBar: SejenakNavbar(index: 2),
     );
@@ -130,7 +138,7 @@ class _MeditationState extends State<Meditation> {
           SliverToBoxAdapter(
             child: SejenakHeaderPage(
               text: "Meditasi",
-              profile: widget.user?.user?.profil,
+              profile: widget.user?.user?.avatar,
             ),
           ),
           SliverToBoxAdapter(
@@ -139,13 +147,11 @@ class _MeditationState extends State<Meditation> {
           SliverToBoxAdapter(
             child: _buildActionButtons(),
           ),
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SejenakText(
-                text: "Belum ada meditasi harian untuk hari ini.",
-                type: SejenakTextType.small,
-              ),
+          SejenakContainer(
+            // padding: const EdgeInsets.all(16),
+            child: SejenakText(
+              text: "Belum ada meditasi harian untuk hari ini.",
+              type: SejenakTextType.small,
             ),
           ),
         ],
@@ -160,7 +166,7 @@ class _MeditationState extends State<Meditation> {
         SliverToBoxAdapter(
           child: SejenakHeaderPage(
             text: "Meditasi",
-            profile: widget.user?.user?.profil,
+            profile: widget.user?.user?.avatar,
           ),
         ),
         SliverToBoxAdapter(
@@ -310,11 +316,14 @@ class _MeditationState extends State<Meditation> {
                           processingState == AudioProcessingState.buffering;
 
         if (dailyMeditation == null) {
-          return const Padding(
-            padding: EdgeInsets.all(16),
-            child: SejenakText(
-              text: "Belum ada meditasi harian untuk hari ini.",
-              type: SejenakTextType.small,
+          return Padding(
+            padding: const EdgeInsets.all(16),
+            child: const SejenakContainer(
+              // padding: EdgeInsets.all(16),
+              child: SejenakText(
+                text: "Belum ada meditasi harian untuk hari ini.",
+                type: SejenakTextType.small,
+              ),
             ),
           );
         }

@@ -120,7 +120,7 @@ class _JournalState extends State<Journal> {
   }
 
   Widget _buildLoadingState() {
-    final String? profileImage = user?.user?.profil;
+    final String? profileImage = user?.user?.avatar;
 
     return Column(
       children: [
@@ -136,7 +136,7 @@ class _JournalState extends State<Journal> {
   }
 
   Widget _buildErrorState(String error) {
-    final String? profileImage = user?.user?.profil;
+    final String? profileImage = user?.user?.avatar;
 
     return Column(
       children: [
@@ -152,7 +152,7 @@ class _JournalState extends State<Journal> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
-    final String? profileImage = user?.user?.profil;
+    final String? profileImage = user?.user?.avatar;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +257,7 @@ class _JournalState extends State<Journal> {
   }
 
   Widget _buildJournalList(List<JournalModels> journals, BuildContext context) {
-    final String? profileImage = user?.user?.profil;
+    final String? profileImage = user?.user?.avatar;
 
     return CustomScrollView(
       slivers: [

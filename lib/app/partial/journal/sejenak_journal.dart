@@ -192,51 +192,51 @@ class SejenakJournal {
                               ),
                               Spacer(),
                               // Anonymous Toggle
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isAnonymous = !isAnonymous;
-                                  });
-                                },
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: isAnonymous
-                                        ? SejenakColor.primary
-                                        : Colors.grey[300],
-                                    borderRadius: BorderRadius.circular(20),
-                                    border: Border.all(
-                                      color: isAnonymous
-                                          ? SejenakColor.secondary
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.visibility_off,
-                                        size: 16,
-                                        color: isAnonymous
-                                            ? SejenakColor.white
-                                            : Colors.grey,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Anonymous',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w500,
-                                          color: isAnonymous
-                                              ? SejenakColor.white
-                                              : Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 10),
+                              // GestureDetector(
+                              //   onTap: () {
+                              //     setState(() {
+                              //       isAnonymous = !isAnonymous;
+                              //     });
+                              //   },
+                              //   child: Container(
+                              //     padding: EdgeInsets.symmetric(
+                              //         horizontal: 12, vertical: 6),
+                              //     decoration: BoxDecoration(
+                              //       color: isAnonymous
+                              //           ? SejenakColor.primary
+                              //           : Colors.grey[300],
+                              //       borderRadius: BorderRadius.circular(20),
+                              //       border: Border.all(
+                              //         color: isAnonymous
+                              //             ? SejenakColor.secondary
+                              //             : Colors.grey,
+                              //       ),
+                              //     ),
+                              //     child: Row(
+                              //       children: [
+                              //         Icon(
+                              //           Icons.visibility_off,
+                              //           size: 16,
+                              //           color: isAnonymous
+                              //               ? SejenakColor.white
+                              //               : Colors.grey,
+                              //         ),
+                              //         SizedBox(width: 4),
+                              //         Text(
+                              //           'Anonymous',
+                              //           style: TextStyle(
+                              //             fontSize: 12,
+                              //             fontWeight: FontWeight.w500,
+                              //             color: isAnonymous
+                              //                 ? SejenakColor.white
+                              //                 : Colors.grey,
+                              //           ),
+                              //         ),
+                              //       ],
+                              //     ),
+                              //   ),
+                              // ),
+                              // SizedBox(width: 10),
                             ],
                           ),
                           SizedBox(height: 20),
@@ -430,25 +430,25 @@ class SejenakJournal {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                SizedBox(height: 10),
-                                Container(
-                                  child: SejenakPrimaryButton(
-                                    width: 60,
-                                    height: 60,
-                                    text: "",
-                                    action: () async {
-                                      final pickedFile =
-                                          await _picker.pickImage(
-                                              source: ImageSource.gallery);
-                                      if (pickedFile != null) {
-                                        setState(() {
-                                          image = File(pickedFile.path);
-                                        });
-                                      }
-                                    },
-                                    icon: "assets/svg/camera.svg",
-                                  ),
-                                ),
+                                // SizedBox(height: 10),
+                                // Container(
+                                //   child: SejenakPrimaryButton(
+                                //     width: 60,
+                                //     height: 60,
+                                //     text: "",
+                                //     action: () async {
+                                //       final pickedFile =
+                                //           await _picker.pickImage(
+                                //               source: ImageSource.gallery);
+                                //       if (pickedFile != null) {
+                                //         setState(() {
+                                //           image = File(pickedFile.path);
+                                //         });
+                                //       }
+                                //     },
+                                //     icon: "assets/svg/camera.svg",
+                                //   ),
+                                // ),
                                 SizedBox(height: 10),
                                 Container(
                                   child: SejenakPrimaryButton(
@@ -460,7 +460,7 @@ class SejenakJournal {
                                       titleController.text,
                                       _quillController,
                                     ),
-                                    icon: 'assets/svg/save.svg',
+                                    // icon: 'assets/svg/save.svg',
                                   ),
                                 ),
                               ],
