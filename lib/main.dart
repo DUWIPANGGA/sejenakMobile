@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:selena/firebase_options.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/screen/landing_page/landing_page.dart';
 import 'package:selena/services/audio/audio_initializer/audio_initializer.dart';
+import 'package:selena/services/journal/journal.dart';
 import 'package:selena/session/user_session.dart';
 
 import 'routes/routes.dart';
@@ -17,6 +19,20 @@ void main() async {
   );
 
   await AudioInitializer.init();
+  final journalService = JournalApiService();
+final userSession = UserSession();
+  await userSession.loadUserFromPrefs();
+
+Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> results) {
+  // Ambil hasil terakhir dari list
+  final result = results.isNotEmpty ? results.last : ConnectivityResult.none;
+
+  if (result != ConnectivityResult.none) {
+    journalService.syncPendingJournals();
+  }
+});
+
+
 
   runApp(MainApp());
 }

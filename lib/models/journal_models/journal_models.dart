@@ -1,4 +1,6 @@
-class JournalModels {
+import 'package:selena/services/local/json_serializable.dart';
+
+class JournalModels  implements JsonSerializable{
   int? entriesId;
   String? content;
   String? title;
@@ -20,7 +22,7 @@ class JournalModels {
         createdAt: json['created_at'] as String?,
         updatedAt: json['updated_at'] as String?,
       );
-
+@override
   Map<String, dynamic> toJson() => {
         'id': entriesId, // ✅ konsisten dengan API
         'content': content,

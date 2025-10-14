@@ -1,7 +1,8 @@
 import 'package:selena/models/post_likes/post_likes.dart';
 import 'package:selena/models/user_models/user.dart';
+import 'package:selena/services/local/json_serializable.dart';
 
-class PostModels {
+class PostModels implements JsonSerializable{
   int? postId;
   bool? isAnonymous;
   String? title;
@@ -49,7 +50,7 @@ class PostModels {
             ?.map((e) => LikeModel.fromJson(e))
             .toList(),
       );
-
+@override
   Map<String, dynamic> toJson() => {
         'id': postId,
         'image': postPicture,

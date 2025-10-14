@@ -13,6 +13,7 @@ import 'package:selena/models/journal_models/journal_models.dart';
 import 'package:selena/models/user_models/user_models.dart';
 import 'package:selena/root/sejenak_color.dart';
 import 'package:selena/services/journal/journal.dart';
+import 'package:selena/services/local/app_preferences.dart';
 import 'package:selena/session/user_session.dart';
 
 class Journal extends StatefulWidget {
@@ -29,12 +30,55 @@ class _JournalState extends State<Journal> {
   @override
   void initState() {
     super.initState();
-    _loadJournals();
+    _loadCachedThenRemote();
   }
 
   void _loadJournals() {
     setState(() {
       result = journalService.getAllJournal();
+    });
+  }
+
+  void _loadCachedThenRemote() async {
+    List<JournalModels> localJournals =
+        await journalService.getAllLocalAndPendingJournal();
+
+    if (localJournals.isNotEmpty) {
+      setState(() {
+        _journals = localJournals;
+        result = Future.value(localJournals);
+      });
+    }
+
+    final fetched = journalService.getAllLocalAndPendingJournal();
+
+    fetched.then((fetchedJournals) async {
+      setState(() {
+        _journals = fetchedJournals;
+        result = Future.value(fetchedJournals);
+      });
+
+      // Simpan ke cache
+      await AppPreferences.saveModelList<JournalModels>(
+        'cached_journals',
+        fetchedJournals,
+      );
+
+      final refreshedPending = await AppPreferences.loadPendingJournals();
+      final refreshedPendingModels =
+          refreshedPending.map((e) => JournalModels.fromJson(e)).toList();
+
+      if (refreshedPendingModels.isNotEmpty) {
+        setState(() {
+          _journals = [..._journals, ...refreshedPendingModels];
+        });
+      }
+    }).catchError((e) {
+      if (localJournals.isEmpty) {
+        setState(() {
+          result = Future.error(e);
+        });
+      }
     });
   }
 
@@ -67,8 +111,8 @@ class _JournalState extends State<Journal> {
         },
       ),
       floatingActionButton: SejenakFloatingButton(
-        onPressed: () => SejenakJournal(onJournalSaved: _loadJournals)
-            .showEditMode(context),
+        onPressed: () =>
+            SejenakJournal(onJournalSaved: _loadJournals).showEditMode(context),
       ),
       endDrawer: SejenakSidebar(user: user),
       bottomNavigationBar: SejenakNavbar(index: 3),
@@ -77,7 +121,7 @@ class _JournalState extends State<Journal> {
 
   Widget _buildLoadingState() {
     final String? profileImage = user?.user?.profil;
-    
+
     return Column(
       children: [
         SejenakHeaderPage(
@@ -93,7 +137,7 @@ class _JournalState extends State<Journal> {
 
   Widget _buildErrorState(String error) {
     final String? profileImage = user?.user?.profil;
-    
+
     return Column(
       children: [
         SejenakHeaderPage(
@@ -109,7 +153,7 @@ class _JournalState extends State<Journal> {
 
   Widget _buildEmptyState(BuildContext context) {
     final String? profileImage = user?.user?.profil;
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -214,7 +258,7 @@ class _JournalState extends State<Journal> {
 
   Widget _buildJournalList(List<JournalModels> journals, BuildContext context) {
     final String? profileImage = user?.user?.profil;
-    
+
     return CustomScrollView(
       slivers: [
         // Header
@@ -261,7 +305,7 @@ class _JournalState extends State<Journal> {
               final String title = journal.title ?? 'Tanpa Judul';
               final String content = journal.content ?? 'Tanpa Konten';
               final String? createdAt = journal.createdAt;
-              
+
               return Padding(
                 key: ValueKey('journal_$journalId'),
                 padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -296,7 +340,8 @@ class _JournalState extends State<Journal> {
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Tidak dapat mengedit journal tanpa ID"),
+                            content:
+                                Text("Tidak dapat mengedit journal tanpa ID"),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -306,7 +351,8 @@ class _JournalState extends State<Journal> {
                       if (journalId == null) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Tidak dapat menghapus journal tanpa ID"),
+                            content:
+                                Text("Tidak dapat menghapus journal tanpa ID"),
                             backgroundColor: Colors.red,
                           ),
                         );
@@ -368,7 +414,7 @@ class _JournalState extends State<Journal> {
   Widget _buildJournalStats(List<JournalModels> journals) {
     // Hitung statistik dengan null safety
     int totalJournals = journals.length;
-    
+
     int thisMonth = DateTime.now().month;
     int monthlyJournals = journals.where((journal) {
       if (journal.createdAt == null) return false;
@@ -465,20 +511,20 @@ class _JournalState extends State<Journal> {
     // Logic untuk menentukan mood dari journal dengan null safety
     final String? content = journal.content;
     if (content == null) return '😐';
-    
+
     final String contentLower = content.toLowerCase();
-    
-    if (contentLower.contains('senang') || 
-        contentLower.contains('bahagia') || 
+
+    if (contentLower.contains('senang') ||
+        contentLower.contains('bahagia') ||
         contentLower.contains('gembira')) {
       return '😊';
-    } else if (contentLower.contains('sedih') || 
-               contentLower.contains('kecewa') || 
-               contentLower.contains('pilu')) {
+    } else if (contentLower.contains('sedih') ||
+        contentLower.contains('kecewa') ||
+        contentLower.contains('pilu')) {
       return '😔';
-    } else if (contentLower.contains('marah') || 
-               contentLower.contains('kesal') || 
-               contentLower.contains('jengkel')) {
+    } else if (contentLower.contains('marah') ||
+        contentLower.contains('kesal') ||
+        contentLower.contains('jengkel')) {
       return '😠';
     } else {
       return '😐';
