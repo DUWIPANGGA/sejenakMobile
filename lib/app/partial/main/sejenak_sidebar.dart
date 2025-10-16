@@ -70,30 +70,33 @@ class SejenakSidebar extends StatelessWidget {
               ),
             ),
             child: ClipOval(
-              child: user?.user?.profil == null || user!.user!.profil!.isEmpty
-                  ? Container(
-                      color: SejenakColor.light,
-                      child: Icon(
-                        Icons.person,
-                        size: 40,
-                        color: SejenakColor.stroke,
-                      ),
-                    )
-                  : Image.network(
-                      "${API.endpointImage}storage/${user!.user!.profil}",
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: SejenakColor.light,
-                          child: Icon(
-                            Icons.person,
-                            size: 40,
-                            color: SejenakColor.stroke,
-                          ),
-                        );
-                      },
-                    ),
-            ),
+  child: user?.user?.avatar == null || user!.user!.avatar!.isEmpty
+      ? Container(
+          color: SejenakColor.light,
+          child: Icon(
+            Icons.person,
+            size: 40,
+            color: SejenakColor.stroke,
+          ),
+        )
+      : Image.network(
+          user!.user!.avatar!.startsWith('http')
+              ? user!.user!.avatar! // langsung pakai URL
+              : "${API.endpointImage}storage/${user!.user!.avatar}", // kalau relatif
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              color: SejenakColor.light,
+              child: Icon(
+                Icons.person,
+                size: 40,
+                color: SejenakColor.stroke,
+              ),
+            );
+          },
+        ),
+),
+
           ),
           const SizedBox(height: 16),
 
